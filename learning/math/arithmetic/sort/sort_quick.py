@@ -6,6 +6,7 @@
         等左边也运行完了就进入下一轮循环 直至 低位指针和高位指针相遇，就进入递归
      
         
+        TODO 有问题存在，当数据量达到 20000 就要好久
 '''
 def quick(data):
     return sort(data, 0, len(data)-1)
