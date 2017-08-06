@@ -12,6 +12,10 @@ import sort_quick as quick
 
 '''
     参数： [数量] [范围][排序类别][c 检查/s 展示]
+
+    结论： 在效率上，箱排序，归并排序,快速排序 是同等级比较好的排序方法，
+        快速一般要快于归并（如果数据大量重复就会慢，归并不受影响）
+    
 '''
 
 def main():
@@ -99,7 +103,7 @@ def run_sort(function, origin_data, title, detail, check):
     data = origin_data[:] # 复制数据，为了不影响其他排序算法
     start = get_time()
     result_data = function(data)
-    get_time(start, True)
+    get_time(start)
     show_list(result_data, result_title, detail, check)
 
 def show_list(data, title, show=True, check=False):
@@ -114,7 +118,7 @@ def show_list(data, title, show=True, check=False):
                 break
         if success:
         #    print("<<<  排序结果完全正确  >>>")
-            print('OK')
+            print('>>> OK !')
         else:
             print('！！！算法编写错误！！！')
         #    return 0
@@ -140,11 +144,11 @@ def create_data(size, max):
     return data
 
 
-def get_time(start=None, end=False):
+def get_time(start=None):
     '''得到时间，计算运行时间的函数'''
     
     now = datetime.datetime.now()
-    if end:
+    if not start == None:
         print('排序耗时', now - start)
     return now
 
