@@ -1,6 +1,7 @@
 ## Python 学习仓库
 - learning 普通文件
 - pygame 学习pygame模块
+- samples 案例？
 
 Python之父Guido推荐的命名规范包括如下几点：
 模块名和包名采用小写字母并且以下划线分隔单词的形式；
