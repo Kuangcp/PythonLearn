@@ -1,3 +1,4 @@
+import math
 '''
     堆(优先队列) 建立在完全二叉树上 使用列表存储，第一个元素是标识元素，真正从1开始是堆
     小顶堆： i <= 2*i 且 i<2*i+1 即父节点大于等于左右子节点
@@ -20,30 +21,60 @@ def insert(heap, value):
             heap[index_space] = value
             break
 
+def check_heap(heap):
+    ''' 比较堆的有序性 '''
+    flag = True
+    # start = int(len(heap)/8)
+    while flag:
+        flag = False
+        for i in range(2, len(heap)): 
+            # 原本从2开始，对完整堆进行检查，现在只检查三层 提高 20% 左右效率但是会时不时出现bug
+            # 因为，如果是子节点填充父节点，只会可能导致这两层乱序，如果是相邻子节点填充当前父节点就有可能导致三层乱序
+            if (heap[i] < heap[int(i/2)]):
+                flag = True
+                temp = heap[i]
+                heap[i] = heap[int(i/2)]
+                heap[int(i/2)] = temp
+
 def delete_min(heap):
+    if len(heap)==3:
+        if heap[1] < heap[2]:
+            return heap.pop(1)
+        return heap.pop()
+    elif len(heap) == 2:
+        return heap.pop()
+    elif len(heap) == 1:
+        return None
+    
     result = heap[1]
     # 下滤
+
+    # 重建式，效率更低
+    # heap[1] = heap.pop()
+    # heap.pop(0)
+    # heap = build_heap(heap)
+    # print(heap)
+
+    # 将第一个和最后一个踢出，层层往下比较，填充直到最后一层，然后将最后一个已经填充的数放入最后一个值
     key = heap.pop() # 最后一个弹出
     space = 1
-    while space<len(heap) - 1:
+    while 2*space+1 <= len(heap)-1:
+        # print('空白',space, len(heap))
         if heap[space * 2] < heap[space * 2 + 1]:
             heap[space] = heap[space * 2]
+            space = 2 * space
         else:
             heap[space] = heap[space * 2 + 1]
-    print(heap)
+            space = space * 2 + 1
+    # 空到最后一层时，填充进已经填充好了的数，若发现填充破坏了堆的有序性，就交换
+    heap[space] = key
+    check_heap(heap)
+    # print('运算结束',heap,space)
     return result
 
 def build_heap(data):
-    ''' 构建堆 '''
+    ''' 构建堆返回一个新列表 '''
     heap = [0]
     for ele in data:
         insert(heap, ele)
     return heap
-
-def main():
-    lists = [1,4,-2,-3,2,0]
-    result = build_heap(lists)
-    print(result) 
-    delete_min(result)
-
-main()

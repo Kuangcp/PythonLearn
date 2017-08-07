@@ -9,6 +9,7 @@ import sort_select as select
 import sort_shell as shell
 import sort_merge as merge
 import sort_quick as quick
+import sort_heap as heap
 
 '''
     参数： [数量] [范围][排序类别][c 检查/s 展示]
@@ -32,6 +33,7 @@ def main():
     flag_shell = False
     flag_merge = False
     flag_quick = False
+    flag_heap = False
     flag_all = True # 如果没有指定排序就是全部
 
     # 得到参数，如果是 python main.py s c 就输出数据信息并且检查排序结果
@@ -40,10 +42,10 @@ def main():
             sort_size = int(sys.argv[1])
             max_num = int(sys.argv[2])
         except ValueError:
-            print("默认长度10 100000")
+            pass
+            # print("默认长度10 100000")
         for param in sys.argv:
-            # print(param, len(param))
-            # 如果参数中有两位的，说明是指定的排序，就不要全运行了
+            # 如果参数中有两位的且不是数字，说明是指定的排序，就不要全运行了
             if len(param) == 2 and not isinstance(param, int):
                 flag_all = False
                 
@@ -65,10 +67,13 @@ def main():
                 flag_merge = True
             if param == 'qu':
                 flag_quick = True
+            if param == 'he':
+                flag_heap = True
             
     # 如果没有指定参数就默认是全部排序运行
     if flag_all:
-        flag_bubble = flag_box = flag_insert = flag_select = flag_shell = flag_merge = flag_quick = True
+        flag_box = flag_merge = flag_quick = True
+        flag_bubble = flag_insert = flag_select = flag_shell = flag_heap =  True
     
     # 生成随机数据
     origin_data = [random.randint(1, max_num) for x in range(sort_size)]
@@ -76,7 +81,6 @@ def main():
     show_list(origin_data, '-'*10+'得到原始数据', detail)# 由参数确定书否输出
 
     # 开始排序
-    
     if flag_box:
         run_sort(box.box, origin_data, '箱排序', detail, check)
     if flag_merge:
@@ -91,8 +95,15 @@ def main():
         run_sort(bubble.bubble, origin_data, '冒泡排序', detail, check)
     if flag_shell:
         run_sort(shell.shell, origin_data, '希尔排序', detail, check)
+    if flag_heap:
+        run_sort(heap.heaps, origin_data, '堆排序', detail, check)
     
-    
+
+    print('-'*30+' 开始列表sort方法排序')
+    data = origin_data[:] # 复制数据，为了不影响其他排序算法
+    start = get_time()
+    data.sort()
+    get_time(start)
 
 def run_sort(function, origin_data, title, detail, check):
     ''' 

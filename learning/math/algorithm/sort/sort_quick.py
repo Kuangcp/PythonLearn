@@ -21,6 +21,26 @@ def quick(data):
     # return sort(data, 0, len(data)-1)
     return quickSort(data, 0, len(data)-1)
 
+# 高效无误的写法
+def quickSort(L, low, high):
+    i = low 
+    j = high
+    if i >= j:
+        return L
+    key = L[i]
+    while i < j:
+        while i < j and L[j] >= key:
+            j = j-1                                                             
+        L[i] = L[j]
+        while i < j and L[i] <= key:    
+            i = i+1 
+        L[j] = L[i]
+    L[i] = key 
+    quickSort(L, low, i-1)
+    quickSort(L, j+1, high)
+    return L
+
+# 低效有bug
 def sort(data, low, high):
     index_low = low
     index_high = high
@@ -64,21 +84,3 @@ def sort(data, low, high):
     if index_high > high:
         sort(data, index_low+1, high)
     return data
-
-def quickSort(L, low, high):
-    i = low 
-    j = high
-    if i >= j:
-        return L
-    key = L[i]
-    while i < j:
-        while i < j and L[j] >= key:
-            j = j-1                                                             
-        L[i] = L[j]
-        while i < j and L[i] <= key:    
-            i = i+1 
-        L[j] = L[i]
-    L[i] = key 
-    quickSort(L, low, i-1)
-    quickSort(L, j+1, high)
-    return L
