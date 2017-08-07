@@ -70,7 +70,8 @@ def main():
     if flag_all:
         flag_bubble = flag_box = flag_insert = flag_select = flag_shell = flag_merge = flag_quick = True
     
-    origin_data = create_data(sort_size, max_num)
+    # 生成随机数据
+    origin_data = [random.randint(1, max_num) for x in range(sort_size)]
     print('排序的数据数量： [', sort_size, ']  数据范围： [ 0 -', max_num, ']\n')
     show_list(origin_data, '-'*10+'得到原始数据', detail)# 由参数确定书否输出
 
@@ -135,13 +136,7 @@ def show_list(data, title, show=True, check=False):
             print(line)
             line = ''
     print(line)
-    
 
-def create_data(size, max):
-    data = []
-    for i in range(0, size):
-        data.append(random.randint(1,max))
-    return data
 
 
 def get_time(start=None):
