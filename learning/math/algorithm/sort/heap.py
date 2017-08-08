@@ -47,14 +47,14 @@ def delete_min(heap):
         return None
     
     result = heap[1]
-    # 下滤
-
+    
     # 重建式，效率更低
     # heap[1] = heap.pop()
     # heap.pop(0)
     # heap = build_heap(heap)
     # print(heap)
-
+    
+    # 下滤
     # 将第一个和最后一个踢出，层层往下比较，填充直到最后一层，然后将最后一个已经填充的数放入最后一个值
     key = heap.pop() # 最后一个弹出
     space = 1
@@ -78,3 +78,13 @@ def build_heap(data):
     for ele in data:
         insert(heap, ele)
     return heap
+
+def decreaseKey():
+    ''' 降低关键字的值， 降低处在指定位置的值 上滤操作'''    
+    pass
+def increaseKey():
+    ''' 增加关键字的值， 增加处在指定位置的值 下滤操作'''
+    pass
+def delete():
+    ''' 先decreaseKey上滤到顶层，然后delete'''
+    pass

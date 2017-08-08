@@ -25,17 +25,25 @@ def quick(data):
 def quickSort(L, low, high):
     i = low 
     j = high
+    # 不合理的区间不做操作
     if i >= j:
         return L
     key = L[i]
     while i < j:
+        # 找出右边小于低位所在的标识值
         while i < j and L[j] >= key:
-            j = j-1                                                             
+            j = j-1         
+        # print('--',i,j,L)        
         L[i] = L[j]
+        # print('>=',i,j,L)
+        # 找出左边大于标识值
         while i < j and L[i] <= key:    
             i = i+1 
+        # print('--',i,j,L)
         L[j] = L[i]
+        # print('<=',i,j,L)
     L[i] = key 
+    # print(L)
     quickSort(L, low, i-1)
     quickSort(L, j+1, high)
     return L
