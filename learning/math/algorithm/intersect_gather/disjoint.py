@@ -5,7 +5,12 @@ import random
 
 def union_by_size(father, root1, root2):
     ''' 必须是两个根节点 按节点数大小来合并 小的合并到大上 使用父节点数组来存放树的大小，负数形式'''
-    if father[root1] > 0 or father[root2] > 0:
+    # 如果进来的参数不是根节点，就要去找根节点，压缩查找就很有用了
+    if father[root1] > 0:
+        root1 = find_pathcompress(father, root1)
+    if father[root2] > 0:
+        root2 = find_pathcompress(father, root2)
+    if root1 == root2:
         return 0
     if father[root1] > father[root2]: # size上 1 比 2 小
         father[root2] = father[root1] + father[root2] # 先把两个根的大小相加
@@ -45,20 +50,27 @@ def find_pathcompress(father, index):
         return father[index]
 
 def main():
-    data = [random.randint(1,100) for x in range(10)]
-    father = [-1 for x in range(len(data))]
-    # size = [1 for x in range(len(data))]
-    union_by_size(father, 4, 5)
-    union_by_size(father, 4, 6)
-    union_by_size(father, 4, 7)
-    union_by_size(father, 0, 1)
-    union_by_size(father, 0, 2)
-    union_by_size(father, 0, 3)
-    union_by_size(father, 4, 8)
-    union_by_size(father, 0, 4)
-    print(data, father)
-    print(find_pathcompress(father,3))
-    print(data, father)
+    # data = [random.randint(1,100) for x in range(10)]
+    # father = [-1 for x in range(len(data))]
+    # # size = [1 for x in range(len(data))]
+    # union_by_size(father, 4, 5)
+    # union_by_size(father, 4, 6)
+    # union_by_size(father, 4, 7)
+    # union_by_size(father, 0, 1)
+    # union_by_size(father, 0, 2)
+    # union_by_size(father, 0, 3)
+    # union_by_size(father, 4, 8)
+    # union_by_size(father, 0, 4)
+    # print(data, father)
+    # print(find_pathcompress(father,3))
+    # print(data, father)
+    father = [-1 for x in range(9)]
+    union_by_size(father, 5, 8)
+    union_by_size(father, 8, 3)
+    union_by_size(father, 2, 3)
+    print(father)
+    union_by_size(father, 2, 8)
 
+    print(father)
 
 main()
