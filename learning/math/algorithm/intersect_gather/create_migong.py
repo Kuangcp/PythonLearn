@@ -21,26 +21,45 @@ def destroy_line(data, father, width, height, index=None, where=None):
     # TODO 需要增加一个条件，就是已经连通的两个节点，就不继续拆墙了，不然到后面墙全没了
     index = random.randint(0, width*height-1)
     where = random.randint(1,6)%2 # 0 1 下 右
-    print('位置：',index, '墙：',where)
+    # print('位置：',index, '墙：',where)
     # 将随机出来的那面墙消除
-    if data[index][1][where] == 0 :
+    if data[index][1][where] == 0: # 已经是墙
         return 0
     data[index][1][where] = 0
-    print(data)
+    # print(data)
     if where == 0: # 下面的墙销毁,当前和下节点连通
-        print('下', index, index+width)
+        # print('下', index, index+width)
         if index+width <= len(data)-1 :
             gather.union_by_size(father,index, index+width)
     else:
-        print('右', index, index+width)
+        # print('右', index, index+width)
         if not (index+1) % width == 0:
             gather.union_by_size(father,index, index+1)
-    print(father)
+    # print(father)
 
-def show_result(data):
-    ''' 展示结果 '''
-    pass
+def show_result(data, width, height, start, end):
+    ''' 展示结果 ''' 
+    for h in range(height):
+        last_flag = False
+        print('|', end="")
+        for w in range(width):
+            index = h*width+w
+            if data[index][1][0] == 1:
+                print('_', end="")
+            else:
+                print(' ', end="")
+            if data[index][1][1] == 1:
+                print('|', end="")
+                if w == width-1:
+                    last_flag = True
+            elif  w != width-1:
+                print(' ', end="")
+        if not last_flag:
+            print('|', end="")
+        print()
+
 def main():
+    
     # sys.setrecursionlimit(100000)
     try:
         max_width = int(sys.argv[1])
@@ -49,20 +68,29 @@ def main():
     except IndexError:
         print('请输入宽高两个参数在文件后')
         sys.exit(1)
+    
     # 初始化一个完整的墙的地图，放数据是为了以后还能放道具
     # [1,[1,1]] 是一个单元格 1，1 表示下右有墙 width * height 大小的地图
     data = []
+    # 地图的开始节点和出口节点
+    start_index = max_width-1
+    end_index = len(data)-max_width
+
     for h in range(0, max_height):
         for d in range(0, max_width):
             data.append([h*max_width+d, [1,1]])
     data[len(data)-1][1] = [0,0]
-    print('初始化',data)
+    # print('初始化',data)
     father = [-1 for x in range(len(data))]
     while True:
-        sleep(0.3)
+        # sleep(0.3)
         destroy_line(data, father, max_width, max_height)
-        if finish(father, max_width-1, len(data)-max_width):
+        # 出入口两个集合相交， 运算结束
+        if finish(father, start_index, end_index):
             break
 
-    print('结果是',father)
+    # print('结果是',father)
+    show_result(data, max_width, max_height, start_index, end_index)
+
+
 main()
