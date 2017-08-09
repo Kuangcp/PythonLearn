@@ -17,71 +17,75 @@ def finish(father, start, end):
     return gather.find_pathcompress(father, start) == gather.find_pathcompress(father, end)
 
 def destroy_line(data, father, width, height, index=None, where=None):
-    # print(index, where)
-    # TODO 需要增加一个条件，就是已经连通的两个节点，就不继续拆墙了，不然到后面墙全没了
     index = random.randint(0, width*height-1)
     where = random.randint(1,6)%2 # 0 1 下 右
+    # 已经连通的节点就不去做并操作了，并且将特殊的最右边，最下边的节点进行处理
+    if where == 0:
+        if index+width > len(data)-1: # 当是最后一行就不要考虑并操作了
+            return 0
+        if gather.check_disjoint(father, index, index+width):
+            return 0
+    else:
+        if (index+1) % width == 0:
+            return 0
+        if gather.check_disjoint(father, index, index+1):
+            return 0
     # print('位置：',index, '墙：',where)
     # 将随机出来的那面墙消除
     if data[index][1][where] == 0: # 已经是墙
         return 0
     data[index][1][where] = 0
     # print(data)
-    if where == 0: # 下面的墙销毁,当前和下节点连通
+    if where == 0: # 下面的墙销毁,当前和下节点连通，前面做了最后一行的判断
         # print('下', index, index+width)
-        if index+width <= len(data)-1 :
-            gather.union_by_size(father,index, index+width)
+        gather.union_by_size(father,index, index+width)
     else:
         # print('右', index, index+width)
-        if not (index+1) % width == 0:
-            gather.union_by_size(father,index, index+1)
+        gather.union_by_size(father,index, index+1)
     # print(father)
 
 def show_result(data, width, height, start, end):
     ''' 展示结果 ''' 
+    print('_'*(width*2-1))
     for h in range(height):
         last_flag = False
         print('|', end="")
         for w in range(width):
             index = h*width+w
-            if data[index][1][0] == 1:
+            if index!=end and (data[index][1][0] == 1 or index//width == (height-1)):
                 print('_', end="")
             else:
                 print(' ', end="")
             if data[index][1][1] == 1:
                 print('|', end="")
-                if w == width-1:
-                    last_flag = True
             elif  w != width-1:
                 print(' ', end="")
-        if not last_flag:
-            print('|', end="")
         print()
 
 def main():
-    
     # sys.setrecursionlimit(100000)
     try:
         max_width = int(sys.argv[1])
         max_height = int(sys.argv[2])
         print('宽 × 高：',max_width, max_height)
     except IndexError:
-        print('请输入宽高两个参数在文件后')
+        print('请输入宽高两个参数 例如: python3 create_migong.py 20 20 ')
         sys.exit(1)
     
     # 初始化一个完整的墙的地图，放数据是为了以后还能放道具
     # [1,[1,1]] 是一个单元格 1，1 表示下右有墙 width * height 大小的地图
     data = []
-    # 地图的开始节点和出口节点
-    start_index = max_width-1
-    end_index = len(data)-max_width
-
     for h in range(0, max_height):
         for d in range(0, max_width):
             data.append([h*max_width+d, [1,1]])
-    data[len(data)-1][1] = [0,0]
+    
     # print('初始化',data)
     father = [-1 for x in range(len(data))]
+    # 地图的开始节点和出口节点
+    start_index = max_width-1
+    end_index = (len(data)-max_width)
+    data[end_index][1] = [0,1] # 将出口节点的底墙去掉， 关于开始就不用担心了，因为算法的原因，是肯定不会鼓励出来的
+    
     while True:
         # sleep(0.3)
         destroy_line(data, father, max_width, max_height)
@@ -90,7 +94,8 @@ def main():
             break
 
     # print('结果是',father)
+    print(start_index, end_index)
     show_result(data, max_width, max_height, start_index, end_index)
-
+    print('默认入口在右上角，出口在左下角')
 
 main()

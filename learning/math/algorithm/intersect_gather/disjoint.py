@@ -19,6 +19,9 @@ def union_by_size(father, root1, root2):
         father[root1] = father[root1] + father[root2]
         father[root2] = root1
 
+def check_disjoint(father, index1, index2):
+    ''' 检测两个节点是否不相交　''' 
+    return find_pathcompress(father,index1) == find_pathcompress(father, index2)
 
 def union_by_height(father, root1, root2):
     if father[root2] < father[root1]:# 如果2更深就把1挂在2下面
@@ -70,6 +73,7 @@ def main():
     union_by_size(father, 2, 3)
     print(father)
     union_by_size(father, 2, 8)
+    print(check_disjoint(father, 1,8))
 
     print(father)
 
