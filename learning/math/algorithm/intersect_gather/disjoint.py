@@ -1,4 +1,3 @@
-import random
 '''
     不相交的集合下的 union find 算法
 '''

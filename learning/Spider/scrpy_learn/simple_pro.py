@@ -4,12 +4,14 @@ import redis
 import sys, os
 from time import sleep
 import getopt
-
+import threading
+import time
+from tkinter import *
 
 '''
     针对该网址进行爬取 http://www.55156.com/tag/ 先得到标签,然后再去爬取 其实就是模仿点击事件
 '''
-run_flag = True
+# run_flag = True
 
 def getconn():
     return redis.Redis(host='localhost', port=6379, db=0)
@@ -90,19 +92,26 @@ def readhtml(url):
                }
     print('-'*30)
     print('尝试读取 URL',url)
+    # line('尝试读取 URL'+url.decode('utf-8'))
+    listbox.insert(ANCHOR, '尝试读取 URL'+url.decode('utf-8')) 
     # 这个逻辑就是, 如果读取超时,就重新发起一次,如果还是失败,直接终止
     try:
         result = requests.get(url, timeout=4, headers=headers)
     except Exception:
         print("!!!!!!!! 超时等待5s后重试 ......", url)
+        listbox.insert(ANCHOR, "!!!!!!!! 超时等待5s后重试 ......"+url.decode('utf-8'))
         try:    
             sleep(5)
             result = requests.get(url, timeout=5, headers=headers)
         except Exception:
             print("第二次重试失败 程序退出")
-            sys.exit(1)
+            listbox.insert(ANCHOR, "第二次重试失败 程序退出")
+            sys.exit()
+            # return 0
     
     print("  ->读取返回状态码",result)
+    # line("  ->读取返回状态码"+str(result))
+    listbox.insert(ANCHOR, "  ->读取返回状态码"+str(result)) 
     if str(result) == '<Response [200]>':
         pass
     elif str(result).startswith('<Response [4'):
@@ -154,32 +163,30 @@ def get_tags(conn,home):
         conn.lpush('tag_list', home+href)
     print('读取标签成功')
 
-def get_more_img(conn):
+# def get_more_img(conn, run_flag):
+#     # 确定类别
+#     siwameinv = 'http://www.55156.com/a/siwameinv/'
     
-    # 确定类别
-    siwameinv = 'http://www.55156.com/a/siwameinv/'
+#     # 也就是说,如果已经运行过,那么默认是按着上次未完成的,继续爬取
+#     # 如果是第一次就需要输入URL
+#     url = conn.lindex('no_read',0)
+#     if url == None:
+#         url = input("请输入起始URL")
     
+#     deal_html(url, conn)
+#     # TODO 退出条件？？？
     
-    # 也就是说,如果已经运行过,那么默认是按着上次未完成的,继续爬取
-    # 如果是第一次就需要输入URL
-    url = conn.lindex('no_read',0)
-    if url == None:
-        url = input("请输入起始URL")
-    
-    deal_html(url, conn)
-    # TODO 退出条件？？？
-    
-    while run_flag:
-        sleep(2)
-        # 进入下一轮抓取,不采用递归调用
-        # 不使用这种方式是因为,始终里面只有一个元素,如果弹出后面插入,就会被删掉,又新建,会有丢数据的隐患还不稳定
-        #last = conn.rpoplpush('no_read', 'readed')
-        last = conn.lindex('no_read',0)
-        conn.lpush('readed', last) # 加入已爬取列表
-        conn.sadd('readed_set', last)
+#     while run_flag:
+#         sleep(2)
+#         # 进入下一轮抓取,不采用递归调用
+#         # 不使用这种方式是因为,始终里面只有一个元素,如果弹出后面插入,就会被删掉,又新建,会有丢数据的隐患还不稳定
+#         #last = conn.rpoplpush('no_read', 'readed')
+#         last = conn.lindex('no_read',0)
+#         conn.lpush('readed', last) # 加入已爬取列表
+#         conn.sadd('readed_set', last)
         
-        print('    ->准备读取下一个URL',last)
-        deal_html(last, conn)
+#         print('    ->准备读取下一个URL',last)
+#         deal_html(last, conn)
         
 # 输入类别,然后得到方向 URL 是想每次输入不同的类别,就能有针对性的抓取,然后再下载
 def catch_tags(conn):
@@ -209,122 +216,107 @@ def catch_tags(conn):
     #deal_html(tag_url, conn)
     return tag_url.decode('utf-8')
 
-home = 'http://www.55156.com'
-def exit_app():
-    run_flag = False
-
-def main():
-    conn = getconn()
-    # 读取参数 t 是读取标签 默认是继续上次的抓取
-    opts, args = getopt.getopt(sys.argv[1:], 'td')
-    for op,value in opts:
-        if op == "-d":
-            catch_tags(conn)
-            sys.exit(0)
-        if op == "-t":
-            #print('获取分类')
-            get_tags(conn, home)
-            sys.exit(0)
+# def main():
+#     conn = getconn()
+#     # 读取参数 t 是读取标签 默认是继续上次的抓取
+#     opts, args = getopt.getopt(sys.argv[1:], 'td')
+#     for op,value in opts:
+#         if op == "-d":
+#             catch_tags(conn)
+#             sys.exit(0)
+#         if op == "-t":
+#             #print('获取分类')
+#             get_tags(conn, home)
+#             sys.exit(0)
     
-    # 缺省
-    get_more_img(conn)
+#     # 缺省
+#     get_more_img(conn)
+home = 'http://www.55156.com'
 
 
-main()
+
+
+# main()
 # tkf.button('开始', main)
 
-# tkf.button('结束', exit_app)
-# tkf.frame()
-# tkf.main_pro(main)
 
 
 
-
-
-# 有问题,,,,,
-
-    #url = 'http://www.cnblogs.com/ymy124/archive/2012/06/23/2559282.html'
-    #url1 = 'http://53eo.com/htm/2017/7/14/p02/380287.html'
-    #url2 = 'http://53eo.com/p02/index.html'
+class Application(threading.Thread): #The timer class is derived from the class threading.Thread  
+    def __init__(self, num):  
+        threading.Thread.__init__(self)  
+        self.thread_num = num  
+        self.thread_stop = False  
     
-    #url4 = 'http://www.55156.com/a/siwameinv/198089_2.html'
+    def run(self):
+         self.main_get()
 
+    def main_get(self):
+        conn = getconn()
+        self.get_more_img(conn)
 
-s = """
-    <img alt="性感黑丝旗袍美女端庄气质美腿最加分" height="300" src="http://t2.55156.com/uploads/allimg/170719/22-1FG91505360-L.jpg" width="200"/>
-<img alt="兔女郎丝袜诱惑秀色可餐极品美色" height="300" src="http://t2.55156.com/uploads/allimg/170719/22-1FG91505410-L.jpg" width="200"/>
-<img alt="职业装ol女郎性感高跟鞋黑丝美腿秀" height="300" src="http://t2.55156.com/uploads/allimg/170719/22-1FG91505320-L.jpg" width="200"/>
-"""
-#def request_main():
-    #result = requests.get('https://github.com/kuangcp')
-    # print(result.text)
+    def stop(self):  
+        print('按下结束')
+        self.thread_stop = True  
 
-    # lines = result.text.split('\n')
-    # for line in lines:
-    #     print(line)
-    #     line.split()
-
-
- 
-#Host: www.55156.com
-#User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:53.0) Gecko/20100101 Firefox/53.0
-#Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-#Accept-Language: zh-CN,en-US;q=0.7,en;q=0.3
-#Accept-Encoding: gzip, deflate
-#Referer: http://www.55156.com/a/siwameinv/150671_2.html
-#Connection: keep-alive
-#Upgrade-Insecure-Requests: 1
-#If-Modified-Since: Tue, 27 Jun 2017 01:29:22 GMT
-#If-None-Match: "5951b4f2-69cb"
-#Cache-Control: max-age=0
-
-
-
-## 保存图片链接到redis里
-#def save_image(soup, conn):
-    #images = soup.find_all('img')
-    ##group = soup.find('title')
-    ##print(group)
-    ##group = str(group).split('</title>')[0].split('<title>')[1]
-    #images_list = []
-    #little = []
-    
-    #for img in images:
-        #img = str(img)
-        #img = getelement(img, 'src')
-        ##print('得到图片链接',img)
-        ##result = img.split(' ')
+    def get_more_img(self,conn):
+        siwameinv = 'http://www.55156.com/a/siwameinv/'
+        url = conn.lindex('no_read',0)
+        if url == None:
+            url = input("请输入起始URL")
         
-        ## 如果是大图就是这个链接, 还有除去 slt 图标
-        #if img.count('uploads/tu') == 1 and img.count('slt')==0:
-            #print('存储符合条件的图片链接',img)
-            #images_list.append(img) 
-        #else:
-            ##print('存储小图',img)
-            #little.append(img)
+        deal_html(url, conn)
+        while not self.thread_stop:
+            sleep(2)
+            last = conn.lindex('no_read',0)
+            conn.lpush('readed', last) # 加入已爬取列表
+            conn.sadd('readed_set', last)
+            print('    ->准备读取下一个URL',last)
+            # line('    ->准备读取下一个URL'+last.decode('utf-8'))
+            # listbox.insert(ACTIVE, '    ->准备读取下一个URL'+last.decode('utf-8'))
             
-    #for da in images_list:
-        ##print(img)
-        #if type(da) == bytes:
-            #da = da.decode('utf-8')
-        #conn.sadd('images',da)
-    #for xiao in little :
-        #if type(xiao) == bytes:
-            #xiao = xiao.decode('utf-8')
-        #conn.sadd('little_img',xiao)
+            deal_html(last, conn)
+        print('退出下载循环')
+        line('退出下载循环')
 
-##<p align="center">
-## 保存链接到未抓取表里去,原本是抓取所有的a标签,然后进行访问,现在发现他 html写的很规整嘛.2333
-#def read_url(url, soup, conn): 
-    ##抓取所有a标签
-    #a_list = soup.find_all('a')
-    #for temp in a_list:
-        #href = str(getelement(str(temp), 'href'))
-        ## a标签中没有href属性???
-        #if href == 'none':
-            #continue
-        ##elif href.startswith('http') and not already_read(href, conn):
-        #elif not already_read(href, conn):
-            ##print('抓取到未访问的指定类别的链接 '+href)
-            ## 头插进入队列
-            #conn.lpush('no_read', href)
+a = Application(12)
+
+
+def frame():
+    root.mainloop()
+
+def line(text):
+    Label(root, text=text).pack()
+
+def button(text, func):
+    Button(root, text=text, command=func).pack(side=TOP)
+
+def get_screen_size(window):  
+    return window.winfo_screenwidth(),window.winfo_screenheight()  
+  
+def get_window_size(window):  
+    return window.winfo_reqwidth(),window.winfo_reqheight()  
+  
+def center_window(root, width, height):  
+    screenwidth = root.winfo_screenwidth()  
+    screenheight = root.winfo_screenheight()  
+    size = '%dx%d+%d+%d' % (width, height, (screenwidth - width)/2, (screenheight - height)/2)  
+    print(size)  
+    root.geometry(size) 
+
+root = Tk()
+# 滑动条
+scrollbar = Scrollbar(root)  
+scrollbar.pack(side=RIGHT, fill=Y)  
+listbox = Listbox(root, yscrollcommand=scrollbar.set)   
+listbox.pack(side=BOTTOM, fill=BOTH)  
+scrollbar.config(command=listbox.yview) 
+
+root.title('爬取URL')  
+center_window(root, 400, 240) 
+root.maxsize(600, 400)  
+root.minsize(300, 240)
+button('开始', a.start)
+button('重试', a.main_get)
+button('结束', a.stop)
+frame()
