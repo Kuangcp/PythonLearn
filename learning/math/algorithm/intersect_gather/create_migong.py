@@ -67,7 +67,7 @@ def main():
     try:
         max_width = int(sys.argv[1])
         max_height = int(sys.argv[2])
-        print('宽 × 高：',max_width, max_height)
+        print('宽 × 高：',max_width, '×', max_height)
     except IndexError:
         print('请输入宽高两个参数 例如: python3 create_migong.py 20 20 ')
         sys.exit(1)
@@ -94,7 +94,7 @@ def main():
             break
 
     # print('结果是',father)
-    print(start_index, end_index)
+    # print(start_index, end_index)
     show_result(data, max_width, max_height, start_index, end_index)
     print('默认入口在右上角，出口在左下角')
 
