@@ -31,6 +31,7 @@ def download():
         down_image(url)
         origin.srem("nodown", image)
         origin.sadd("downed", image)
+        # origin.sremove()
         sleep(0.2)
 
 def main():

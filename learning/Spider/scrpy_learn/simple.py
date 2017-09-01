@@ -8,6 +8,8 @@ import getopt
 
 '''
     针对该网址进行爬取 http://www.55156.com/tag/ 先得到标签,然后再去爬取 其实就是模仿点击事件
+    需要 pip3版本的安装 bs4 redis lxml
+    往redis 中 lpush no_read http://www.55156.com/gaoqingtaotu/xiuren/204409_22.html 即可开始，但是好像只能抓jpg类型
 '''
 run_flag = True
 
