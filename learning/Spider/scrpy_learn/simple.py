@@ -13,9 +13,6 @@ import getopt
 '''
 run_flag = True
 
-def getconn():
-    return redis.Redis(host='localhost', port=6379, db=0)
-
 # 从标签中获取指定属性的值
 def getelement(line, element):
     log = open('debug.log','w+')
@@ -121,7 +118,9 @@ def readhtml(url):
 def deal_html(url, conn):
     soup = readhtml(url)
     #print(soup.prettify())
-    conn.hset('HTML',url, soup.prettify())
+    # 将页面保存
+    # conn.hset('HTML',url, soup.prettify())
+    
     # 分离出里面的元素
     #save_image(soup, conn)
     #read_url(url, soup, conn)
@@ -160,7 +159,6 @@ def get_more_img(conn):
     
     # 确定类别
     siwameinv = 'http://www.55156.com/a/siwameinv/'
-    
     
     # 也就是说,如果已经运行过,那么默认是按着上次未完成的,继续爬取
     # 如果是第一次就需要输入URL
@@ -216,7 +214,15 @@ def exit_app():
     run_flag = False
 
 def main():
-    conn = getconn()
+    params = sys.argv
+    if len(params) < 2:
+        return 0
+    if len(params) == 5:
+        conn = redis.Redis(host=params[1], port=params[2], db=params[3], password=params[4])
+    elif len(params) == 4:
+        conn = redis.Redis(host=params[1], port=params[2], db=params[3])
+    else:
+        conn = conn = redis.Redis(host="localhost", port=6379, db=0)
     # 读取参数 t 是读取标签 默认是继续上次的抓取
     opts, args = getopt.getopt(sys.argv[1:], 'td')
     for op,value in opts:
@@ -233,11 +239,6 @@ def main():
 
 
 main()
-# tkf.button('开始', main)
-
-# tkf.button('结束', exit_app)
-# tkf.frame()
-# tkf.main_pro(main)
 
 
 

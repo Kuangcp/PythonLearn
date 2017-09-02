@@ -1,40 +1,45 @@
 import urllib.request as request
 import redis
 from time import sleep
+import sys
 
-# url = 'http://ovjs7rsrm.bkt.clouddn.com/china_area.jpg'  
-# print("downloading with urllib")
-# request.urlretrieve(url, "/home/kcp/test/a.jpg")
-target_dir = "/home/kcp/Pictures/hunluan/siwa/"
-
-def getconn(db):
-    return redis.Redis(host='localhost', port=6379, db=db)
     
-def down_image(url):
+def down_image(target_dir, url):
     print(url)
     try:
         request.urlretrieve(url, target_dir+""+url.split("/")[-1])
     except Exception:
-        print("下载失败,稍后重试")
+        print("下载失败,稍后重试,网络或目录不存在")
 
-def download():
-    origin = getconn(0)
-    
+def download(host, port, db, target_dir, no_download, downloaded, password=None):
+    if password == None:
+        origin = redis.Redis(host=host, port=port, db=db)
+    else:
+        origin = redis.Redis(host=host, port=port, db=db, password=password)
     #  做差集运算
-    origin.sdiffstore("nodown", "images", "downed")
-    images = origin.smembers("nodown")
+    origin.sdiffstore(no_download, "images", downloaded)
+    images = origin.smembers(no_download)
     count = 0
     
     for image in images:
         count += 1
         url = image.decode("utf-8")
-        down_image(url)
-        origin.srem("nodown", image)
-        origin.sadd("downed", image)
+        down_image(target_dir, url)
+        origin.srem(no_download, image)
+        origin.sadd(downloaded, image)
         # origin.sremove()
         sleep(0.2)
 
-def main():
-    download()
+def read_param():
+    ''' 阅读参数 '''
+    params = sys.argv
+    # 没有参数就是本机
+    if len(params) == 1:
+        download("localhost", 6379, 0, "/home/kcp/Pictures/hunluan/juru/", "nodown", "downed")
+    else:
+        if params[1] == '80':
+            download("120.25.203.47", 6380, 0, "/home/kcp/Pictures/hunluan/xinggan/","no_down2","downed2",password="myth")
 
+def main():
+    read_param()
 main()
