@@ -35,5 +35,6 @@ def main():
     origin  = get_connection("120.25.203.47", 6380, "myth", 0 )
     target = get_connection("118.31.14.157", 6379, "myth123", 0 )
     trans(origin, target)
+    # trans(target, origin)
 
 main()
