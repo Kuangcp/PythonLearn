@@ -1,4 +1,4 @@
-# 使用gtk做界面
+# 使用gtk做界面 Hello World
 import gi
 
 gi.require_version('Gtk', '3.0')
