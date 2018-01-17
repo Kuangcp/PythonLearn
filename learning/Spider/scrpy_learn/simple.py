@@ -215,17 +215,26 @@ def exit_app():
 
 def main():
     params = sys.argv
-    if len(params) < 2:
-        return 0
+    # if len(params) < 2:
+    #     return 0
+    # 初始化Redis连接
     if len(params) == 5:
         conn = redis.Redis(host=params[1], port=params[2], db=params[3], password=params[4])
     elif len(params) == 4:
         conn = redis.Redis(host=params[1], port=params[2], db=params[3])
     else:
-        conn = conn = redis.Redis(host="localhost", port=6379, db=0)
+        conn = conn = redis.Redis(host="localhost", port=6379, db=1)
     # 读取参数 t 是读取标签 默认是继续上次的抓取
-    opts, args = getopt.getopt(sys.argv[1:], 'td')
+    opts, args = getopt.getopt(sys.argv[1:], 'tdh')
     for op,value in opts:
+        if op == "-h":
+            print("  -h     查看帮助信息")
+            print("  -d     选择标签")
+            print("  -t     获取所有标签")
+            print("  host port db password  使用指定的redis")
+            print("  host port db           使用指定的redis")
+            print("  缺省                    使用localhost 6379 1 无密码 redis")
+            sys.exit(0)
         if op == "-d":
             catch_tags(conn)
             sys.exit(0)
@@ -233,11 +242,8 @@ def main():
             #print('获取分类')
             get_tags(conn, home)
             sys.exit(0)
-    
     # 缺省
     get_more_img(conn)
-
-
 main()
 
 

@@ -10,6 +10,7 @@ from tkinter import *
 
 '''
     针对该网址进行爬取 http://www.55156.com/tag/ 先得到标签,然后再去爬取 其实就是模仿点击事件
+    sudo pip3 bs4 redis tkinter
 '''
 # run_flag = True
 
