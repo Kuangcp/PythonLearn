@@ -1,9 +1,9 @@
 ## Python 学习仓库
-> [爬图](/learning/Spider/scrpy_learn/simple.py) | [下载](/learning/Spider/scrpy_learn/download.py)
+> [爬图](https://github.com/Kuangcp/PythonLearn/tree/master/learning/Spider/scrpy_learn)
 
 - learning 普通文件
 - pygame 学习pygame模块
-- samples 案例？
+- example 别人的案例 
 
 Python之父Guido推荐的命名规范包括如下几点：  
 模块名和包名采用小写字母并且以下划线分隔单词的形式；  

@@ -1,7 +1,7 @@
 import redis
 
 def getconn():
-    return redis.Redis(host='localhost', port=6379, db=0)
+    return redis.Redis(host='localhost', port=6379, db=1)
 
 conn = getconn()
 list = conn.smembers('images')
