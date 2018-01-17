@@ -35,7 +35,7 @@ def read_param():
     params = sys.argv
     # 没有参数就是本机
     if len(params) == 1:
-        download("localhost", 6379, 0, "/home/kcp/Music/55156/juru/", "nodown", "downed")
+        download("localhost", 6379, 0, "/home/kcp/Music/55156/siwa/", "nodown", "downed")
     else:
         if params[1] == '80':
             download("120.25.203.47", 6380, 0, "/home/kcp/Pictures/hunluan/xinggan/","no_down2","downed2",password="myth")
