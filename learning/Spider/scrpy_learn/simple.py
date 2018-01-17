@@ -165,6 +165,7 @@ def get_more_img(conn):
     url = conn.lindex('no_read',0)
     if url == None:
         url = input("请输入起始URL")
+        # TODO 这里逻辑有错误,不能进入下一步, 可以换成redis lpush操作
     
     deal_html(url, conn)
     # TODO 退出条件？？？
