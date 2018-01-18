@@ -18,10 +18,3 @@ for line in list:
         targetFile.close()
         targetFile = open('result/'+str(fileName)+".md", "w+")
 
-# with open('show.md','w+') as show:
-    
-#     for line in list:
-#         #print('- ',line)
-#         if type(line) == bytes:
-#             line = line.decode('utf-8')
-#         show.write('![12]('+line+')\n')

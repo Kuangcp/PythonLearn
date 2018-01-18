@@ -1,7 +1,7 @@
 import redis
 
 
-# 交换key value
+# redis中交换key value
 
 def get_connection(host, port, password, db):
     return redis.Redis(host, port, db, password)

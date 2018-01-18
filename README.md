@@ -1,6 +1,6 @@
 ## Python 学习仓库
 >  案例:  
->> [爬取美女图片](https://github.com/Kuangcp/PythonLearn/tree/master/learning/Spider/scrpy_learn/55156)  
+>> [没使用框架,简单的爬取图片](https://github.com/Kuangcp/PythonLearn/tree/master/learning/Spider/scrpy_learn/55156)  
 
 - learning 普通文件
 - pygame 学习pygame模块
