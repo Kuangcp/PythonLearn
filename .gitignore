@@ -1,9 +1,12 @@
 
 
-### 
+ 
 .idea/
 *.iml
 *.py[cod]
+*.jpg
+*.png
+*.gif
 
 test.db
 test.txt

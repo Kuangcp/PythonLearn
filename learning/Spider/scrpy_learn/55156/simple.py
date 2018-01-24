@@ -78,7 +78,7 @@ def read_content(url, soup, conn):
                 break
             img_url = getelement(temp, 'src')
             conn.sadd('images',img_url)
-            print("URL:",catch_url, '  img:', img_url, '图片区域的HTML代码', temp)
+            # print("URL:",catch_url, '  img:', img_url, '图片区域的HTML代码', temp)
             break
         print("fsdfsdfs")
 

@@ -38,6 +38,11 @@ def read_param():
         download("localhost", 6379, 2, "/home/kcp/Music/55156/siwa/", "nodown", "downed")
     elif params[1] == '80':
         download("120.25.203.47", 6380, 0, "/home/kcp/Pictures/hunluan/xinggan/","no_down2","downed2",password="myth")
+    else:
+        img_path = params[1]+"/img/"
+        print("下载目录: "+img_path)
+        download("localhost", 6379, 2, img_path, "nodown", "downed")
+        
 
 def main():
     read_param()
