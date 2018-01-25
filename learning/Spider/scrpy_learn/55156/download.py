@@ -5,6 +5,7 @@ import sys
 
     
 def down_image(target_dir, url):
+    ''' TODO  BUG:文件覆盖问题'''
     print(url)
     try:
         request.urlretrieve(url, target_dir+""+url.split("/")[-1])
