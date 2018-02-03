@@ -1,4 +1,6 @@
+#!#/usr/bin/python3
 import requests
+# import urllib.request as request
 from bs4 import BeautifulSoup
 import sys, os
 from time import sleep
@@ -48,8 +50,10 @@ class ReadURL:
         ''' 对代码块 block 查找 element属性的值 找不到就返回 none'''
         # log = open('debug.log','w+')
 
-        print(block)
-        elements = block.split(' ')
+        # print(element, '筛选的DOM:', block)
+        if  str(element) not in str(block) :
+            return None
+        elements = str(block).split(' ')
         for ele in elements:
             if ele.startswith(element):
                 return ele.split('"')[1]
@@ -61,10 +65,16 @@ class ReadURL:
         try:
             filename = str(time.time()).replace('.', '')
             dirs = os.getcwd();
-            print(filename)
             filename = dirs+"/img/"+filename+".jpg"
-            r = requests.get(url) 
+            print('文件目录:', filename)
+            headers = {"Cookie: _cnzz=1101; fist_user=1;"}
+            r = requests.get(url, headers) 
+            # request.urlretrieve(url, filename, data=headers)
+            
             with open(filename, "wb") as code:
                 code.write(r.content)
         except Exception:
             print("下载失败,稍后重试,网络或目录不存在")
+    
+    def downFileWithDir(self, urlList, dir, title):
+        pass
