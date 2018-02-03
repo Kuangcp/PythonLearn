@@ -1,16 +1,20 @@
 #!/bin/dash
 
 # 把图片链接分开来, 方便细颗粒管理
+basePath=`pwd`'/'
 title=''
-cd tests/test
 total=1
-cat ../../imgfile | while read line
-do 
+
+# 根据传入的参数创建目录和下载图片
+downByURL(){
+    line=$1
     title=`echo $line | grep '='`
     # echo $title
     if [ "$title"z != 'z' ];then
         echo $title
-        cd ../../ && mkdir -p $title && cd "$title"
+        # cd $basePath
+        mkdir -p $basePath$title && cd $basePath$title
+        echo "mkdir -p $basePath$title && cd $basePath$title"
     else
         total=`expr $total + 1`;
         filename=`echo $line | colrm 1 43`
@@ -19,7 +23,23 @@ do
         curl -o $filename -H "Cookie: _cnzz=1101; fist_user=1" $line
     fi
     # sleep 2
+}
+downImg(){
+    cat $1 | while read line
+    do 
+        downByURL $line
+    done
+    cd $basePath && echo "实际下载"`ls -lR|grep "^-"|wc -l`"个"
+}
 
-done
-cd /home/kcp/PycharmProjects/PythonMythLearn/learning/Spider/scrpy_learn/53eo/img
-echo "实际下载"`ls -lR|grep "^-"|wc -l`"个"
+case $1 in 
+	-d | d)
+        downImg $2
+	;;
+    -re | re)
+        echo "在某文件下下载图片"
+    ;;
+    -h | h)
+        printf "-d|d file  使用对应的配置文件进行下载"
+    ;;
+esac

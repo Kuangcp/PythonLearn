@@ -11,11 +11,13 @@ def readImg(index):
     result = soup.find_all('div', class_='location')
     imgType = str(result).split('»')[-1].split('</div>')[0]
     print(imgType)
-    
+    imgType = str(imgType).strip()
     title = soup.find('h1')
     title = str(title).split('>')[-3].split('<')[0]
     print(title)
-    imgfile.write("##"+imgType+"|"+str(index)+"|"+title+"\n")
+    title = title.strip().replace('/', '+')
+
+    imgfile.write("="+imgType+"/"+str(index)+"+"+title+"\n")
     content = soup.find_all('img')
     for line in content:
         img = readUrl.getelement(line, 'src')
@@ -35,3 +37,5 @@ for i in range(int(start), end, -1):
 
 current = open('img/current', 'w+')
 current.write(str(end))
+
+# 2018-02-03  起点 126421
