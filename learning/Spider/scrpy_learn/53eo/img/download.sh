@@ -40,6 +40,6 @@ case $1 in
         echo "在某文件下下载图片"
     ;;
     -h | h)
-        printf "-d|d file  使用对应的配置文件进行下载"
+        echo "-d|d file  使用对应的配置文件进行下载"
     ;;
 esac
