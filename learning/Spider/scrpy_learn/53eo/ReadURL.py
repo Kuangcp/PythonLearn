@@ -64,7 +64,7 @@ class ReadURL:
     def downFile(self, url):
         try:
             filename = str(time.time()).replace('.', '')
-            dirs = os.getcwd();
+            dirs = os.getcwd()
             filename = dirs+"/img/"+filename+".jpg"
             print('文件目录:', filename)
             headers = {"Cookie: _cnzz=1101; fist_user=1;"}
