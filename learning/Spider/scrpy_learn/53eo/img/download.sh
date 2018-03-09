@@ -17,7 +17,11 @@ downByURL(){
         echo "mkdir -p $basePath$title && cd $basePath$title"
     else
         total=`expr $total + 1`;
-        filename=`echo $line | colrm 1 43`
+        # 将URL截取为文件名, 很容易出问题, 如果域名更换了
+        filename=`echo $line | colrm 1 46`
+        
+        echo $line
+        echo $filename
         printf ">>>>>>当前第:"$total
         # echo "curl -o $filename -H \"Cookie: _cnzz=1101; fist_user=1\" $line"
         curl -o $filename -H "Cookie: _cnzz=1101; fist_user=1" $line
