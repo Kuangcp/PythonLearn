@@ -14,3 +14,4 @@ Python之父Guido推荐的命名规范包括如下几点：
 以上的内容如果是内部的，则使用下划线开头命名。  
 
 
+> [生成迷宫地图](/learning/math/algorithm/intersect_gather/)
