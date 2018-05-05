@@ -38,4 +38,6 @@ for i in range(int(start), end, -1):
 current = open('img/current', 'w+')
 current.write(str(end))
 
+# 逆序下载， 在current， 书写最大就不用管了
 # 2018-02-03  起点 126421
+# 2018-05-05 10:45:55 128873
