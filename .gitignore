@@ -60,3 +60,5 @@ MANIFEST
 .mr.developer.cfg
 .project
 .pydevproject
+
+web_redis_lib/
