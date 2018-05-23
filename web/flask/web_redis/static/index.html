@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Web-Redis</title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+
+<body>
+    <script>
+        function log(data) {
+            console.log(data)
+        }
+        $.get('http://localhost:22334/todo/api/v1.0/key/a', function (data) {
+            log(data)
+            log(data.code)
+            log(data.data)
+        })
+
+        function initRedis() {
+            var data = {
+                host: $("#host").val(),
+                port: $("#port").val(),
+                password: $("#pass").val(),
+                db: $("#db").val()
+            }
+            $.post({
+                url: 'http://localhost:22334/todo/api/v1.0/init_redis',
+                contentType: "application/json",
+                data: JSON.stringify(data)
+            });
+
+        }
+        // function handlePost(url, success, fail){
+        //     var request = $.post({
+        //         url: host + '' + url,
+        //         contentType: "application/json",
+        //         data: JSON.stringify(data)
+        //     });
+        //     request.done(success);
+        //     request.fail(fail);
+        // }
+    </script>
+    <input type="text" id="host" value="127.0.0.1"/>
+    <input type="text" id="port" value="6666"/>
+    <input type="text" id="pass" value=""/>
+    <input type="text" id="db" value="0"/>
+    <button onclick="initRedis()"> 登录 </button>
+
+</body>
+
+</html>

@@ -10,4 +10,6 @@
 ```
 
 ## TODO 
-- [ ] 怎么支持宿主机的Redis, 先搞定容器的Redis吧
+- [ ] 怎么支持宿主机的Redis, 先搞定容器的Redis吧 https://github.com/anapsix/docker-webdis
+
+- [ ] 学习Python的基础语法 尤其是模块
