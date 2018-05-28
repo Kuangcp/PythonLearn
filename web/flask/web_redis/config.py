@@ -1,25 +1,34 @@
+#!/usr/bin/python3
 ##!web_redis_lib/bin/python
 from flask import *
 from flask_cors import CORS
 from base.RedisConfig import RedisConfig
 from base.ResultVO import ResultVO as vo
-# from module.string import test
+# from module.string import *
+from . import app,redis
 
+# app = Flask(__name__, static_folder='./static')
+# CORS(app, supports_credentials=True)
 
-class MainConfig:
-    def __init__(self, redis):
-        self.redis = redis
+# 构造应用基础路径
+url = '/redis/api/v1.0'
 
-
-app = Flask(__name__)
-CORS(app, supports_credentials=True)
-config = MainConfig(None)
-redis = config.redis
-# redis = RedisConfig('127.0.0.1', 6666, '', 0).getConnection()
-
-prefix = '/todo/api'
-version = 'v1.0'
-url = prefix + '/'+version
+# url_for方法能得到相对路径
+# 检查是否初始化redis
+@app.before_request
+def check():
+    global redis
+    path = request.path
+    ignore = ['init_redis', 'show_code', 'html', 'css', 'js', 'jpg']
+    isIgnore = False
+    for one in ignore:
+        if path.endswith(one):
+            isIgnore = True
+            break
+    if redis == None and not isIgnore:
+        return vo.fail(407)
+    else:
+        redirect(path)
 
 @app.route(url+'/keys', methods=['GET'])
 def list_keys():
@@ -29,6 +38,7 @@ def list_keys():
         result.append(one.decode())
     return vo.datas(result)
 
+# 列出所有见, 按键的长度
 @app.route(url+'/keys/<int:len>', methods=['GET'])
 def list_keys_by_len(len):
     list = redis.keys('?'*len)
@@ -39,8 +49,8 @@ def list_keys_by_len(len):
 
 @app.route(url+'/key/<string:key>', methods=['GET'])
 def get_key(key):
-    re = redis.type(key).decode()
-    if re == 'string':
+    re = redis.type(key)
+    if re == b'string':
         result = redis.get(key)
         if result != None:
             return vo.one_data(result.decode())
@@ -49,26 +59,32 @@ def get_key(key):
     else:
         return vo.fail(405)
 
+
 @app.route(url+'/show_code', methods=['GET'])
 def show_code():
     list = {
         '404': "资源找不到",
         '405': "键类型错误",
-        '406': "参数缺失"
+        '406': "参数缺失",
+        '407':"redis连接未初始化"
     }
     return vo.datas(list)
 
 #  TODO  如何处理这个redis连接问题
 @app.route(url+'/init_redis', methods=['POST'])
 def init_redis():
-    if not request.json or not 'host' in request.json or not 'port' in request.json or not 'password' in request.json or not 'db' in request.json:
+    list = ['host', 'port', 'password', 'db']
+    if not request.json :
         return vo.fail(406)
+    for one in list:
+        if not one in request.json:
+            return vo.fail(406)
+    global redis 
     redis = RedisConfig(request.json['host'], request.json['port'], request.json['password'], request.json['db']).getConnection()
-    update_redis(redis)
+    print('初始化 ', redis)
     return vo.success()
 
-def update_redis(redis):
-    redis = redis
+# if __name__ == '__main__':
+#     app.run(debug=True, port=22334)
 
-if __name__ == '__main__':
-    app.run(debug=True, port=22334)
+
