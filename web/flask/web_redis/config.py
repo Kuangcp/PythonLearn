@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 ##!web_redis_lib/bin/python
-from flask import *
-from flask_cors import CORS
 from base.RedisConfig import RedisConfig
 from base.ResultVO import ResultVO as vo
+from flask import *
+
 # from module.string import *
-from . import app,redis
+from . import app
 
 # app = Flask(__name__, static_folder='./static')
 # CORS(app, supports_credentials=True)

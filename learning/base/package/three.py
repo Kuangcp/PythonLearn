@@ -1,7 +1,10 @@
-from first import one
+from second import two
+
 
 def three_a():
     print('root.three', 'a')
 
-three_a()
-one.one_a()
+
+if __name__ == "__main__":
+    three_a()
+    two.two_a()
