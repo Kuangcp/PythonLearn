@@ -58,6 +58,7 @@ def show_code():
     }
     return vo.datas(list)
 
+#  TODO  如何处理这个redis连接问题
 @app.route(url+'/init_redis', methods=['POST'])
 def init_redis():
     if not request.json or not 'host' in request.json or not 'port' in request.json or not 'password' in request.json or not 'db' in request.json:
