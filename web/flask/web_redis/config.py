@@ -1,14 +1,15 @@
-#!/usr/bin/python3
+## !/usr/bin/python3
 ##!web_redis_lib/bin/python
 from base.RedisConfig import RedisConfig
 from base.ResultVO import ResultVO as vo
-from flask import *
 
 # from module.string import *
-from . import app
+from flask import *
+from flask_cors import CORS
 
-# app = Flask(__name__, static_folder='./static')
-# CORS(app, supports_credentials=True)
+redis = None
+app = Flask(__name__, static_folder='./static')
+CORS(app, supports_credentials=True)
 
 # 构造应用基础路径
 url = '/redis/api/v1.0'
@@ -19,7 +20,7 @@ url = '/redis/api/v1.0'
 def check():
     global redis
     path = request.path
-    ignore = ['init_redis', 'show_code', 'html', 'css', 'js', 'jpg']
+    ignore = ['init_redis', 'show_code', 'html', 'css', 'js', 'jpg', 'static/']
     isIgnore = False
     for one in ignore:
         if path.endswith(one):
@@ -36,7 +37,7 @@ def list_keys():
     result = []
     for one in list:
         result.append(one.decode())
-    return vo.datas(result)
+    return vo.multiple(result)
 
 # 列出所有见, 按键的长度
 @app.route(url+'/keys/<int:len>', methods=['GET'])
@@ -45,7 +46,7 @@ def list_keys_by_len(len):
     result = []
     for one in list:
         result.append(one.decode())
-    return vo.datas(result)
+    return vo.multiple(result)
 
 @app.route(url+'/key/<string:key>', methods=['GET'])
 def get_key(key):
@@ -53,7 +54,7 @@ def get_key(key):
     if re == b'string':
         result = redis.get(key)
         if result != None:
-            return vo.one_data(result.decode())
+            return vo.single(result.decode())
         else:
             return vo.fail(404)
     else:
@@ -68,7 +69,7 @@ def show_code():
         '406': "参数缺失",
         '407':"redis连接未初始化"
     }
-    return vo.datas(list)
+    return vo.multiple(list)
 
 #  TODO  如何处理这个redis连接问题
 @app.route(url+'/init_redis', methods=['POST'])
@@ -83,8 +84,4 @@ def init_redis():
     redis = RedisConfig(request.json['host'], request.json['port'], request.json['password'], request.json['db']).getConnection()
     print('初始化 ', redis)
     return vo.success()
-
-# if __name__ == '__main__':
-#     app.run(debug=True, port=22334)
-
 

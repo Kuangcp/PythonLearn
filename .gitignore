@@ -61,4 +61,4 @@ MANIFEST
 .project
 .pydevproject
 
-web_redis_lib/
+venv/

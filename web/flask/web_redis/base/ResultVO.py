@@ -6,11 +6,11 @@ class ResultVO:
         self.data = data
     
     @staticmethod
-    def one_data(data):
+    def single(data):
         return ResultVO(0, 1, data).jsonify()
     
     @staticmethod
-    def datas(data):
+    def multiple(data):
         return ResultVO(0, len(data), data).jsonify()
         
     @staticmethod
@@ -21,6 +21,5 @@ class ResultVO:
     def success():
         return ResultVO(0, 0, 0).jsonify()
     
-
     def jsonify(self):
         return jsonify({"code":self.code, "count":self.count, "data":self.data})
