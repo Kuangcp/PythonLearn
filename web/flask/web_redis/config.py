@@ -1,12 +1,18 @@
 from base.RedisConfig import RedisConfig
 from base.ResultVO import ResultVO as vo
+from base.Line import Line 
 
 from flask import *
 from flask_cors import CORS
 
-redis = None
+
+import datetime
+
+# redis = None
+redis = RedisConfig('127.0.0.1', 6666, None, 2).getConnection()
 app = Flask(__name__, static_folder='./static')
 CORS(app, supports_credentials=True)
+app.config['JSON_AS_ASCII'] = False
 
 # 构造应用基础路径
 url = '/redis/api/v1.0'
@@ -111,3 +117,69 @@ def init_redis():
         return vo.fail(408)
     print('成功初始化Redis ', redis)
     return vo.success()
+
+
+# 按键分析 应用
+
+# TODO 1. 分析得出所有需要统计的按键
+# 2. 拿到最近一周的日期并和总量一起显示 并灵活设置 切换周, 设置月
+# 3. 
+
+def period_key(length, offset):
+    days = []
+    for i in range(offset, length+offset):
+        now_time = datetime.datetime.now()
+        yes_time = now_time + datetime.timedelta(i*-1)
+        new_time = yes_time.strftime('%Y-%m-%d')
+        days.append(new_time)
+    return days
+
+def period_key_with_total(length, offset):
+    days = period_key(length, offset)
+    result = []
+    for day in days:
+        total = redis.get('all-'+day)
+        if total is not None:
+            result.append(day+'#'+total.decode())
+        else:
+            result.append(day+'#0')
+    return result
+
+@app.route(url + '/recent_day/<int:length>/<int:offset>', methods=['GET'])
+def get_recent_day(length=7, offset=0):
+    days = period_key_with_total(length, offset)
+    return vo.multiple(days)
+
+
+def most_key(length, offset):
+    days = period_key(length, offset)
+    # 将每天前五, 敲击次数最多的键的并集
+    result = []
+    for day in days:
+        keyList = []
+        for key, value in redis.zrevrange(day, 0, 1, True):
+            # print(day, key, value)
+            key = key.decode()
+            keyList.append(key)
+        result = list(set(keyList).union(set(result)))
+    # print(result)
+    return result,days
+
+@app.route(url + '/most_key/<int:length>/<int:offset>', methods=['GET'])
+def get_most_key(length=7, offset=0):
+    result,days = most_key(length, offset)
+    return vo.multiple(result)
+
+@app.route(url + '/most_key_with_num/<int:length>/<int:offset>', methods=['GET'])
+def get_most_key_with_num(length=7, offset=0):
+    result,days = most_key(length, offset)
+    lines = []
+    for key in result:
+        data = []
+        for day in days:
+            score = redis.zscore(day, key)
+            data.append(score)
+        line = Line(key, data).to_json()
+        lines.append(line)
+    # print(lines)
+    return vo.multiple(lines)

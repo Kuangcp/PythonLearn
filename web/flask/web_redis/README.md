@@ -21,3 +21,4 @@
 - [ ] Web服务器性能巨差, 还会丢失连接,  gevent 或者nginx来改善
 
 - [ ] http://www.cnblogs.com/Ray-liang/p/4173923.html 学习
+- [ ] 为什么不能载入图表, 参数都是正确的 
