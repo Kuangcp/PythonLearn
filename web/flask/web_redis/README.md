@@ -25,3 +25,4 @@
 
 https://blog.csdn.net/sinat_36651044/article/details/77462831
 
+- [ ] 为什么不能载入图表, 参数都是正确的 
