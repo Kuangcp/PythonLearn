@@ -151,13 +151,13 @@ def get_recent_day(length=7, offset=0):
     return vo.multiple(days)
 
 
-def most_key(length, offset):
+def most_key(length, offset, top):
     days = period_key(length, offset)
     # 将每天前五, 敲击次数最多的键的并集
     result = []
     for day in days:
         keyList = []
-        for key, value in redis.zrevrange(day, 0, 1, True):
+        for key, value in redis.zrevrange(day, 0, top, True):
             # print(day, key, value)
             key = key.decode()
             keyList.append(key)
@@ -165,21 +165,31 @@ def most_key(length, offset):
     # print(result)
     return result,days
 
-@app.route(url + '/most_key/<int:length>/<int:offset>', methods=['GET'])
-def get_most_key(length=7, offset=0):
-    result,days = most_key(length, offset)
-    return vo.multiple(result)
+def most_key_name(result):
+    keys = []
+    for key in result:
+        key_name = redis.hget('key_map', key).decode()
+        keys.append(key_name)
+    return keys
 
-@app.route(url + '/most_key_with_num/<int:length>/<int:offset>', methods=['GET'])
-def get_most_key_with_num(length=7, offset=0):
-    result,days = most_key(length, offset)
+
+@app.route(url + '/most_key/<int:length>/<int:offset>/<int:top>', methods=['GET'])
+def get_most_key(length=7, offset=0, top=5):
+    result = most_key(length, offset, top)[0]
+    return vo.multiple(most_key_name(result))
+
+@app.route(url + '/most_key_with_num/<int:length>/<int:offset>/<int:top>', methods=['GET'])
+def get_most_key_with_num(length=7, offset=0, top=5):
+    result,days = most_key(length, offset, top)
     lines = []
     for key in result:
         data = []
         for day in days:
             score = redis.zscore(day, key)
-            data.append(score)
-        line = Line(key, data).to_json()
+            if score is None:
+                data.append(0)
+            else:
+                data.append(int(score))
+        line = Line(redis.hget('key_map',key).decode(), data).to_json_self()
         lines.append(line)
-    # print(lines)
     return vo.multiple(lines)
