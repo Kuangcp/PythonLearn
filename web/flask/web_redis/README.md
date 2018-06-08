@@ -21,3 +21,7 @@
 - [ ] Web服务器性能巨差, 还会丢失连接,  gevent 或者nginx来改善
 
 - [ ] http://www.cnblogs.com/Ray-liang/p/4173923.html 学习
+- [ ] https://www.jianshu.com/p/679dee0a4193 uwsgi
+
+https://blog.csdn.net/sinat_36651044/article/details/77462831
+
