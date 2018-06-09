@@ -48,7 +48,6 @@ def show_result(data, width, height, start, end):
     ''' 展示结果 ''' 
     print('_'*(width*2-1))
     for h in range(height):
-        last_flag = False
         print('|', end="")
         for w in range(width):
             index = h*width+w
@@ -59,15 +58,16 @@ def show_result(data, width, height, start, end):
             if data[index][1][1] == 1:
                 print('|', end="")
             elif  w != width-1:
-                print(' ', end="")
+                print('_', end="")
         print()
 
 def main():
-    # sys.setrecursionlimit(100000)
     try:
         max_width = int(sys.argv[1])
         max_height = int(sys.argv[2])
-        print('宽 × 高：',max_width, '×', max_height)
+        print('\n\n宽 × 高：',max_width, '×', max_height)
+        print('默认入口在右上角，出口在左下角')
+
     except IndexError:
         print('请输入宽高两个参数 例如: python3 create_migong.py 20 20 ')
         sys.exit(1)
@@ -96,6 +96,5 @@ def main():
     # print('结果是',father)
     # print(start_index, end_index)
     show_result(data, max_width, max_height, start_index, end_index)
-    print('默认入口在右上角，出口在左下角')
 
 main()
