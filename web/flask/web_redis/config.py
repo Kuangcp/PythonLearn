@@ -5,18 +5,17 @@ from base.Line import Line
 from flask import *
 from flask_cors import CORS
 
-
+# web redis
 import datetime
 
 # redis = None
-redis = RedisConfig('127.0.0.1', 6666, None, 2).getConnection()
+redis = RedisConfig('127.0.0.1', 6666, None, 0).getConnection()
 app = Flask(__name__, static_folder='./static')
 CORS(app, supports_credentials=True)
-app.config['JSON_AS_ASCII'] = False
+# app.config['JSON_AS_ASCII'] = False
 
 # 构造应用基础路径
 url = '/redis/api/v1.0'
-
 
 # url_for方法能得到相对路径
 @app.before_request
@@ -26,11 +25,6 @@ def check():
     # 如果路径中包含以下, 就全部忽略校验
     ignore = ['init_redis', 'show_code', 'html', 'css', 'js', 'jpg', '/static/']
     isIgnore = False
-
-    # if path == '/static/':
-    #     print(path + 'index.html')
-    #     redirect('/static/index.html')
-    #     return
     for one in ignore:
         if one in path:
             isIgnore = True
@@ -80,10 +74,10 @@ def key_set():
     if not request.json:
         return vo.fail(406)
     for one in redis_config:
-        if one not in request.json:
+        if one not in request.json or request.json[one] == '':
             return vo.fail(406)
     redis.set(request.json['key'], request.json['value'])
-
+    return vo.success()
 
 @app.route(url + '/show_code', methods=['GET'])
 def show_code():
@@ -97,7 +91,6 @@ def show_code():
     return vo.multiple(result_code)
 
 
-#  TODO  如何处理这个redis连接问题
 @app.route(url + '/init_redis', methods=['POST'])
 def init_redis():
     config_list = ['host', 'port', 'password', 'db']
@@ -112,20 +105,18 @@ def init_redis():
     try:
         redis.ping()
     except Exception as e:
-        print('连接失败', e)
+        print('Failed to connect', e)
         redis = None
         return vo.fail(408)
-    print('成功初始化Redis ', redis)
+    print('Successfully initialized Redis ', redis)
     return vo.success()
 
 
 # 按键分析 应用
-
-# TODO 1. 分析得出所有需要统计的按键
-# 2. 拿到最近一周的日期并和总量一起显示 并灵活设置 切换周, 设置月
-# 3. 
+# TODO 利用以上接口, js操作数据
 
 def period_key(length, offset):
+    """获取时间数组"""
     days = []
     for i in range(offset, length+offset):
         now_time = datetime.datetime.now()
@@ -135,6 +126,7 @@ def period_key(length, offset):
     return days
 
 def period_key_with_total(length, offset):
+    """获取时间数组,以及对应的按键总数"""
     days = period_key(length, offset)
     result = []
     for day in days:
@@ -145,13 +137,9 @@ def period_key_with_total(length, offset):
             result.append(day+'#0')
     return result
 
-@app.route(url + '/recent_day/<int:length>/<int:offset>', methods=['GET'])
-def get_recent_day(length=7, offset=0):
-    days = period_key_with_total(length, offset)
-    return vo.multiple(days)
-
 
 def most_key(length, offset, top):
+    """获取按键最多的键的code"""
     days = period_key(length, offset)
     # 将每天前五, 敲击次数最多的键的并集
     result = []
@@ -166,12 +154,17 @@ def most_key(length, offset, top):
     return result,days
 
 def most_key_name(result):
+    """"获取最多键, 及其名字"""
     keys = []
     for key in result:
         key_name = redis.hget('key_map', key).decode()
         keys.append(key_name)
     return keys
 
+@app.route(url + '/recent_day/<int:length>/<int:offset>', methods=['GET'])
+def get_recent_day(length=7, offset=0):
+    days = period_key_with_total(length, offset)
+    return vo.multiple(days)
 
 @app.route(url + '/most_key/<int:length>/<int:offset>/<int:top>', methods=['GET'])
 def get_most_key(length=7, offset=0, top=5):
@@ -180,6 +173,7 @@ def get_most_key(length=7, offset=0, top=5):
 
 @app.route(url + '/most_key_with_num/<int:length>/<int:offset>/<int:top>', methods=['GET'])
 def get_most_key_with_num(length=7, offset=0, top=5):
+    """组装前端需要的数据结构"""
     result,days = most_key(length, offset, top)
     lines = []
     for key in result:

@@ -10,55 +10,68 @@
     <script src="/static/js/js_lib/echart.v4.0.4.min.js"></script>
 
     <style>
-    .line-chart{
-        width: 100%;
-        height:400px;
-        top: 50px;
-    }
+        .line-chart {
+            width: 100%;
+            height: 500px;
+            top: 50px;
+        }
+        .nav{
+            text-align: center;
+            top: 30px;
+        }
+        .nav input{
+            width: 50px;
+        }
     </style>
 </head>
-
 <body>
-    周期<input id="period" value="5" type="number"/>
-    偏移<input id="offset" value="0" type="number"/>
-    top<input id="top" value="5" type="number"/>
-    <button onclick="add()">生成图表</button>
+    <div class="nav">
+        周期:&nbsp;&nbsp;<input id="period" value="5" type="number" /> 
+        偏移:&nbsp;&nbsp;<input id="offset" value="0" type="number" />
+        top:&nbsp;&nbsp;<input id="top" value="5" type="number" />
+        <button onclick="add()">生成图表</button><br>
+        将每天的 top 取并集, 绘制图表
+    </div>
     <div id="main" class="line-chart"></div>
     <script type="text/javascript">
-        // 基于准备好的dom，初始化echarts实例
         const chart = echarts.init(document.getElementById('main'));
         option = {
             title: {
-                text: '按键分析-折线图堆叠'
+                text: '堆叠区域图'
             },
             tooltip: {
-                trigger: 'axis'
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    label: {
+                        backgroundColor: '#6a7985'
+                    }
+                }
             },
             legend: {
-                data: ['1']
-            },
-            grid: {
-                left: '2%',
-                right: '5%',
-                bottom: '3%',
-                containLabel: true
+                data: []
             },
             toolbox: {
                 feature: {
                     saveAsImage: {}
                 }
             },
-            xAxis: {
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: [{
                 type: 'category',
                 boundaryGap: false,
                 data: []
-            },
-            yAxis: {
+            }],
+            yAxis: [{
                 type: 'value'
-            },
+            }],
             series: []
         };
-        // 使用刚指定的配置项和数据显示图表。
         chart.setOption(option);
 
         function add() {
@@ -66,13 +79,11 @@
             var period = $("#period").val();
             var offset = $("#offset").val();
             var top = $("#top").val();
-            handleGet('/recent_day/'+period+'/'+offset, function(data1){
-                handleGet('/most_key/'+period+'/'+offset+'/'+top, function(data2){
-                    handleGet('/most_key_with_num/'+period+'/'+offset+'/'+top, function(data3){
+            handleGet('/recent_day/' + period + '/' + offset, function (data1) {
+                handleGet('/most_key/' + period + '/' + offset + '/' + top, function (data2) {
+                    handleGet('/most_key_with_num/' + period + '/' + offset + '/' + top, function (data3) {
                         chart.setOption({
                             xAxis: {
-                                type: 'category',
-                                boundaryGap: false,
                                 data: data1.data
                             },
                             legend: {
@@ -83,11 +94,10 @@
                     }, null)
                 }, null)
 
-            }, function(data){
+            }, function (data) {
                 alert('连接失败' + data.responseText)
             });
         }
     </script>
 </body>
-
 </html>

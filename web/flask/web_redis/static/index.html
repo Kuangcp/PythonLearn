@@ -10,29 +10,6 @@
     <script src="/static/js/config.js"></script>
 </head>
 <body>
-<script>
-    function initRedis() {
-        const data = {
-            host: $("#host").val(),
-            port: $("#port").val(),
-            password: $("#pass").val(),
-            db: $("#db").val()
-        };
-        handlePost('/init_redis', data, function (data) {
-            console.log('成功' + data)
-        }, function (data) {
-            console.log('失败' + data)
-        })
-    }
-</script>
-<input type="text" id="host" value="127.0.0.1"/>
-<input type="text" id="port" value="6666"/>
-<input type="text" id="pass" value=""/>
-<input type="text" id="db" value="2"/>
-<button onclick="initRedis()"> 登录</button>
-
-<br>
-<a href="/static/key/analysis-key.html"><button>按键图</button></a>
 
 </body>
 

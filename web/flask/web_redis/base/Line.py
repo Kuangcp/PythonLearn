@@ -16,5 +16,6 @@ class Line:
             "name" : self.name, 
             "data" : self.data,
             "type" : self.type,
-            "stack": self.stack
+            "stack": self.stack,
+            "areaStyle":"{normal: {}}"
         }

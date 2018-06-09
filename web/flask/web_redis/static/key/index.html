@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Web-Redis</title>
+    <script src="/static/js/js_lib/jquery.v3.3.1.min.js"></script>
+    <script src="/static/js/layer/layer.js"></script>
+    <script src="/static/js/config.js"></script>
+</head>
+<body>
+<script>
+    layer.open({
+      type: 1,
+      area: ['300px', '360px'],
+      shadeClose: true, //点击遮罩关闭
+      content: $('#tests').text()
+    });
+    function initRedis() {
+        const data = {
+            host: $("#host").val(),
+            port: $("#port").val(),
+            password: $("#pass").val(),
+            db: $("#db").val()
+        };
+        handlePost('/init_redis', data, function (data) {
+            console.log('成功' + JSON.stringify(data))
+        }, function (data) {
+            console.log('失败' + JSON.stringify(data))
+        })
+    }
+</script>
+<script type="text/html" id="tests">
+    jkfdls
+</script>
+<input type="text" id="host" value="127.0.0.1"/>
+<input type="text" id="port" value="6666"/>
+<input type="text" id="pass" value=""/>
+<input type="text" id="db" value="2"/>
+<button onclick="initRedis()"> 登录</button>
+
+<br>
+<a href="analysis-key.html"><button>统计图</button></a>
+<a href="string.html"><button>String</button></a>
+
+</body>
+
+</html>
