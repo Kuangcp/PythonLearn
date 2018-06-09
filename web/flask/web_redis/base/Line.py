@@ -7,6 +7,7 @@ class Line:
         self.name = name
         self.data = data
     
+    # 使用json库就不对, 自己写就正确??
     def to_json(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True)
 
