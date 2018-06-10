@@ -21,7 +21,7 @@ class ResultVO:
 
     @staticmethod
     def success():
-        return ResultVO(0, 0, 0).to_json()
+        return jsonify({"code":0})
 
     def to_json(self):
         return jsonify({"code": self.code, "count": self.count, "data": self.data})

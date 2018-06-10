@@ -17,3 +17,15 @@ function handlePost(url, data, success, fail) {
     request.done(success);
     request.fail(fail);
 }
+
+function tip(area, title, content){
+    layer.open({
+        type: 1,
+        title: title,
+        area: area,
+        closeBtn:1,
+        resize: false,
+        shadeClose: true, //点击遮罩关闭
+        content: content
+      });
+}

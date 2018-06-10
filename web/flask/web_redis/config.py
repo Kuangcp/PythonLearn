@@ -60,10 +60,9 @@ def key_get(key):
     re = redis.type(key)
     if re == b'string':
         result = redis.get(key)
-        if result is not None:
-            return vo.single(result.decode())
-        else:
-            return vo.fail(404)
+        return vo.single(result.decode())
+    elif re == b'none':
+        return vo.fail(404)
     else:
         return vo.fail(405)
 

@@ -34,3 +34,5 @@ _第一次运行_
 
 https://blog.csdn.net/sinat_36651044/article/details/77462831
 
+- [ ] 更改交互逻辑, 怎么处理多数据类型
+
