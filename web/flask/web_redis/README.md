@@ -20,7 +20,7 @@ _第一次运行_
 
 ### 按键分析模块
 
-![](https://raw.githubusercontent.com/Kuangcp/ImageRepos/master/Image/WebRedis/line_chart.png)
+![](https://raw.githubusercontent.com/Kuangcp/ImageRepos/master/Image/WebRedis/line-area.png)
 
 ## TODO 
 - [ ] 怎么支持宿主机的Redis, 先搞定容器的Redis吧 https://github.com/anapsix/docker-webdis
