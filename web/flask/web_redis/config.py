@@ -165,6 +165,7 @@ def get_recent_day(length=7, offset=0):
     days = period_key_with_total(length, offset)
     return vo.multiple(days)
 
+# TODO 校验三个参数的合法性  
 @app.route(url + '/most_key/<int:length>/<int:offset>/<int:top>', methods=['GET'])
 def get_most_key(length=7, offset=0, top=5):
     result = most_key(length, offset, top)[0]

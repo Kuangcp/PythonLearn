@@ -20,6 +20,8 @@ _第一次运行_
 - 退出虚拟环境 `deactive` 
 
 ## 构建Docker容器运行
+> [参考博客: 在Docker上部署Python的Flask框架的教程](https://www.jb51.net/article/63699.htm) | [参考项目](https://github.com/amouat/example_app)
+
 1. 构建镜像 `docker build -t record . `
 2. 构建redis容器 `docker run  --name redis_server -p 6666:6379 redis:alpine`
 3. 将redis容器连接该容器并启动 `docker run --name test -d -p 22333:22334 --link redis_server:db record`
