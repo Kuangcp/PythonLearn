@@ -2,6 +2,7 @@
 
 > [Flask Web Development book](https://www.flaskbook.com/) | [配套源码](https://github.com/miguelgrinberg/flasky-first-edition) | [Click](http://www.jb51.net/books/400693.html)
 
+> 消耗30M左右内存, Docker镜像 110M
 ## 启动服务流程
 _第一次运行_
 ```sh
@@ -17,6 +18,13 @@ _第一次运行_
     - 启动 `./main.py`
 
 - 退出虚拟环境 `deactive` 
+
+## 构建Docker容器运行
+1. 构建镜像 `docker build -t record . `
+2. 构建redis容器 `docker run  --name redis_server -p 6666:6379 redis:alpine`
+3. 将redis容器连接该容器并启动 `docker run --name test -d -p 22333:22334 --link redis_server:db record`
+4. 访问 localhost:22333/static/key/index.html
+    - 访问后, host填db即可, 端口则是 6379
 
 ### 按键分析模块
 
