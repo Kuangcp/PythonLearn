@@ -62,3 +62,4 @@ MANIFEST
 .pydevproject
 
 venv/
+!layer/
