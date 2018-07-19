@@ -80,6 +80,9 @@
             var offset = $("#offset").val();
             var top = $("#top").val();
             handleGet('/recent_day/' + period + '/' + offset, function (data1) {
+                console.log(data1);
+                // TODO 处理无数据情况
+                
                 handleGet('/most_key/' + period + '/' + offset + '/' + top, function (data2) {
                     handleGet('/most_key_with_num/' + period + '/' + offset + '/' + top, function (data3) {
                         chart.setOption({

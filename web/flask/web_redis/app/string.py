@@ -5,7 +5,6 @@ from base.ResultVO import ResultVO as vo
 from .prompt import mainConfig
 
 url = mainConfig.getUrl()
-redis = mainConfig.getRedis()
 
 @app.route(url + '/keys', methods=['GET'])
 def list_keys():
@@ -31,6 +30,8 @@ def list_keys_by_len(length):
 
 @app.route(url + '/key/<string:key>', methods=['GET'])
 def key_get(key):
+    redis = mainConfig.getRedis()
+    print('key get key=', key, 'redis=', redis)
     re = redis.type(key)
     if re == b'string':
         result = redis.get(key)
@@ -49,5 +50,6 @@ def key_set():
     for one in redis_config:
         if one not in request.json or request.json[one] == '':
             return vo.fail(406)
+    redis = mainConfig.getRedis()
     redis.set(request.json['key'], request.json['value'])
     return vo.success()
