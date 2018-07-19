@@ -26,9 +26,9 @@
 </head>
 <body>
     <div class="nav">
-        周期:&nbsp;&nbsp;<input id="period" value="5" type="number" /> 
-        偏移:&nbsp;&nbsp;<input id="offset" value="0" type="number" />
-        top:&nbsp;&nbsp;<input id="top" value="5" type="number" />
+        周期:&nbsp;&nbsp;<input id="period" value="5" type="number" min="0"/> 
+        偏移:&nbsp;&nbsp;<input id="offset" value="0" type="number" min="0"/>
+        top:&nbsp;&nbsp;<input id="top" value="5" type="number" min="0"/>
         <button onclick="add()">生成图表</button><br>
         将每天的 top 取并集, 绘制图表
     </div>

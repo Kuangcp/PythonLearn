@@ -2,7 +2,7 @@
 
 > [Flask Web Development book](https://www.flaskbook.com/) | [配套源码](https://github.com/miguelgrinberg/flasky-first-edition) | [Click](http://www.jb51.net/books/400693.html)
 
-> 消耗30M左右内存, Docker镜像 110M
+> 消耗 35M 左右内存, Docker镜像 85M
 ## 启动服务流程
 _第一次运行_
 ```sh
