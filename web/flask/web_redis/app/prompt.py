@@ -114,7 +114,10 @@ def most_key_name(result):
     """"获取最多键, 及其名字"""
     keys = []
     for key in result:
-        key_name = redis.hget('key_map', key).decode()
+        key_name = redis.hget('key_map', key)
+        if key_name is None:
+            continue
+        key_name = key_name.decode()
         keys.append(key_name)
     return keys
 
@@ -142,6 +145,9 @@ def get_most_key_with_num(length=7, offset=0, top=5):
                 data.append(0)
             else:
                 data.append(int(score))
-        line = Line(redis.hget('key_map',key).decode(), data).to_json_self()
+        key_name = redis.hget('key_map',key)
+        if key_name is None:
+            continue
+        line = Line(key_name.decode(), data).to_json_self()
         lines.append(line)
     return vo.multiple(lines)
