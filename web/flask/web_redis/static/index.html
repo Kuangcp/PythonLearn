@@ -34,6 +34,7 @@
         width:120px;
     }
 </style>
+
 <body>
 
     <button onclick="init()">初始化连接</button>
@@ -113,56 +114,60 @@
     function init() {
         tip(['200px', '230px'], '初始化连接', $("#init_redis").html());
     }
-    function string(){
+    function string() {
         var set_content = $("#set_key").html()
         var get_content = $("#get_key").html()
         var list_content = $("#list_key").html()
         layer.tab({
             area: ['500px', '520px'],
             tab: [{
-                title: 'set', 
+                title: 'set',
                 content: set_content
             }, {
-                title: 'get', 
+                title: 'get',
                 content: get_content
             }, {
-                title: 'all-keys', 
+                title: 'all-keys',
                 content: list_content
             }]
-        });        
-        $("#set-form").submit(function(e){
+        });
+        $("#set-form").submit(function (e) {
             e.preventDefault();
             set();
         });
-        $("#get-form").submit(function(e){
+        $("#get-form").submit(function (e) {
             e.preventDefault();
             get();
         });
     }
-    
-    function set(){
+
+    function set() {
         var key = $("#key").val()
         var value = $("#value").val()
-        handlePost('/key',  {
-            key: key, 
+        handlePost('/key', {
+            key: key,
             value: value
-        }, function(data){
+        }, function (data) {
             console.log(data)
-        }, function(data){
+        }, function (data) {
             console.log(data)
         })
     }
-    function get(){
+    function get() {
         var key = $("#get-key").val();
-        handleGet('/key/'+key, function(data){
-            if(data.code == '404'){
+        handleGet('/key/' + key, function (data) {
+            if (data.code == '404') {
                 $("#get-result").text('没有该键')
-            }else if(data.code == '405'){
+            } else if (data.code == '405') {
                 $("#get-result").text("该键不是String类型")
-            }else{
+            } else {
                 $("#get-result").text(data.data)
             }
-        }, function(data){})
+        }, function (data) { })
     }
+    handleGet('/show_code', function (code_details) {
+        localStorage.setItem("errorCode", JSON.stringify(code_details));
+    })
 </script>
+
 </html>

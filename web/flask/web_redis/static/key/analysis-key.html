@@ -8,6 +8,7 @@
     <script src="/static/js/js_lib/jquery.v3.3.1.min.js"></script>
     <script src="/static/js/config.js"></script>
     <script src="/static/js/js_lib/echart.v4.0.4.min.js"></script>
+    <script src="/static/js/layer/layer.js"></script>
 
     <style>
         .line-chart {
@@ -81,7 +82,16 @@
             var offset = $("#offset").val();
             var top = $("#top").val();
             handleGet('/recent_day/' + period + '/' + offset, function (data1) {
-                console.log(data1);
+                if(data1.code != 0 ){
+                    code = localStorage.getItem("errorCode");
+                    console.log(code);
+                    
+                    var a = code.data[data1.code];
+                    console.log(a);
+                    
+                    layer.msg(data1.code);
+                    return ;
+                }
                 // TODO 处理无数据情况
                 
                 handleGet('/most_key/' + period + '/' + offset + '/' + top, function (data2) {
