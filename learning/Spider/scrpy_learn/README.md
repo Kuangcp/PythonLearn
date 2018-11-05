@@ -6,3 +6,5 @@
 ## 简单使用
 > 使用 bs4 lxml requests 等模块进行开发简易的爬虫 | [案例详情>>>](https://github.com/Kuangcp/PythonLearn/tree/master/learning/Spider/scrpy_learn/55156)
 
+  https://www.jianshu.com/p/4a54ccdb73b7 
+
