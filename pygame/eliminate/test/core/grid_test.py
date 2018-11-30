@@ -48,7 +48,7 @@ class TestGrid(unittest.TestCase):
             print(state, grid.direct_states[state])
 
     def test_probably(self):
-        grid = Grid(3)
+        grid = Grid(2)
         grid.init_generate_grid()
 
         grid.simple_show()
