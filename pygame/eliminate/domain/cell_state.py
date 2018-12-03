@@ -36,17 +36,24 @@ class CellState:
         elif self.direct_type == DirectType.SOUTH:
             self.calculate_common(grid.col, grid)
         elif self.direct_type == DirectType.EAST:
+            base = 1
+            if len(self.indexes) == 1:
+                base = -1
+
             pre = self.indexes[0] - 1
             if pre > 0 and is_same_row(pre, self.indexes[0], grid):
-                self.pre = pre
+                self.pre = pre * base
             next_ = self.indexes[-1] + 1
             if next_ < grid.row * grid.col and is_same_row(next_, self.indexes[-1], grid):
-                self.next = next_
+                self.next = next_ * base
 
     def calculate_common(self, delta, grid):
+        base = 1
+        if len(self.indexes) == 1:
+            base = -1
         pre = self.indexes[0] - delta
         if pre > 0:
-            self.pre = pre
+            self.pre = pre * base
         next_ = self.indexes[-1] + delta
         if next_ < grid.row * grid.col:
-            self.next = next_
+            self.next = next_ * base

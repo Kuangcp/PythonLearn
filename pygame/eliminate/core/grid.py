@@ -1,3 +1,4 @@
+import math
 import random
 
 from core.main_config import MainConfig
@@ -15,7 +16,7 @@ class CellVO:
     def __init__(self, ref_id, index, count):
         self.index = index
         self.ref_id = ref_id
-        self.count = count
+        self.count = count  # 重叠的权重
 
     def __repr__(self) -> str:
         return 'id=' + self.ref_id + ' index=' + str(self.index) + ' count=' + str(self.count)
@@ -147,14 +148,15 @@ class Grid:
 
         if temp_.get_type() == cell.get_type() == CellType.MONSTER and temp_.is_same(cell):
             temp.append(cell)
-        else:
+        elif cell.get_type() == CellType.MONSTER:
             self.add_monster(temp, direct_type)
             temp = [cell]
-
+        else:
+            temp = []
         return temp
 
     def add_monster(self, temp, direct_type):
-        if len(temp) < 2:
+        if len(temp) == 0:
             return
 
         indexes = []
@@ -162,17 +164,16 @@ class Grid:
             indexes.append(e.index)
         state = CellState(temp[0].ref_id, indexes, direct_type)
 
-        if len(temp) == 2:
+        if len(temp) <= 2:
             if direct_type not in self.probably_eliminate:
                 self.probably_eliminate[direct_type] = [state]
             else:
                 self.probably_eliminate[direct_type].append(state)
-            return
-
-        if direct_type not in self.direct_states:
-            self.direct_states[direct_type] = [state]
         else:
-            self.direct_states[direct_type].append(state)
+            if direct_type not in self.direct_states:
+                self.direct_states[direct_type] = [state]
+            else:
+                self.direct_states[direct_type].append(state)
 
     # 生成/掉落
     def generate_new(self):
@@ -187,18 +188,19 @@ class Grid:
         pass
 
     # 找出最佳方案
-    def best_plan_to_transfer(self):
-        pass
+    def best_plan_to_transfer(self) -> CellVO:
+        return self.get_alternative_monster()[0]
 
+    # 获取备选方案
     def get_alternative_monster(self) -> [CellVO]:
         self.check_eliminate()
 
         result = []
         result.extend(self.cell_vo_by_successive())
-        result.extend(self.cell_vo_by_discontinuous())
+        # result.extend(self.cell_vo_by_discontinuous())
         return result
 
-    # xxo
+    # 分为 xo ox xx
     def cell_vo_by_successive(self) -> [CellVO]:
         ref_count = {}  # id -> [index]
         for direct in self.probably_eliminate:
@@ -222,18 +224,24 @@ class Grid:
             result.extend(self.get_repeated_indexes(ref_id, indexes))
         return result
 
-    # TODO xxox xox
-    def cell_vo_by_discontinuous(self) -> [CellVO]:
-        return []
+    # # TODO xxox oxx, oxx xox
+    # def cell_vo_by_discontinuous(self) -> [CellVO]:
+    #
+    #     return []
 
     def get_repeated_indexes(self, ref_id, indexes) -> [CellVO]:
         temp = {}
         result = []
         for index in indexes:
+            base = 1
+            if index < 0:
+                index *= -1
+                base = 1 / 8
             if index not in temp:
-                temp[index] = 1
+                temp[index] = base
             else:
-                temp[index] = temp[index] + 1
+                temp[index] = temp[index] + base
+            print(ref_id, index, temp)
 
         for index in temp:
             if temp[index] > 1 and self.grid[index].get_type() == CellType.MONSTER:

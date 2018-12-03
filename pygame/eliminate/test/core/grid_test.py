@@ -64,7 +64,7 @@ class TestGrid(unittest.TestCase):
         grid.init_generate_grid()
 
         grid.simple_show()
-        grid.show()
+        # grid.show()
 
         result = grid.get_alternative_monster()
         for vo in result:

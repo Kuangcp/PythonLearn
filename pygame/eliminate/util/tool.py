@@ -2,7 +2,6 @@ import unittest
 
 
 # just temporary code
-
 class Tool(unittest.TestCase):
 
     def test_generate_data(self):
