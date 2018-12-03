@@ -52,9 +52,26 @@ class TestGrid(unittest.TestCase):
         grid.init_generate_grid()
 
         grid.simple_show()
+
         grid.check_eliminate()
         for state in grid.probably_eliminate:
-            print(state, grid.probably_eliminate[state])
+            state_list = grid.probably_eliminate[state]
+            for cell in state_list:
+                print(cell.direct_type, cell.ref_id, cell.get_pre(grid), cell.indexes, cell.get_next(grid))
+
+    def test_get_alternative_monster(self):
+        grid = Grid()
+        grid.init_generate_grid()
+
+        grid.simple_show()
+        grid.show()
+
+        result = grid.get_alternative_monster()
+        for vo in result:
+            print(vo)
+
+        if len(result) == 0:
+            print('There is no way to eliminate it.')
 
 
 if __name__ == '__main__':

@@ -1,7 +1,8 @@
 import random
-from enum import Enum
 
 from core.main_config import MainConfig
+from domain.cell_state import CellState
+from domain.direct_type import DirectType
 from domain.enum_type import OrderType, CellType
 from domain.monster import Monster
 from domain.stone import Stone
@@ -10,20 +11,14 @@ from util.log import logging
 STONE_DEFAULT_HP = 1
 
 
-class DirectType(Enum):
-    SOUTH = 0
-    EAST = 1
-    SOUTH_EAST = 2
-    NORTH_EAST = 3
-
-
-class CellState:
-    def __init__(self, ref_id, indexes):
+class CellVO:
+    def __init__(self, ref_id, index, count):
+        self.index = index
         self.ref_id = ref_id
-        self.indexes = indexes
+        self.count = count
 
     def __repr__(self) -> str:
-        return str(self.ref_id) + ' ' + str(self.indexes)
+        return 'id=' + self.ref_id + ' index=' + str(self.index) + ' count=' + str(self.count)
 
 
 class Grid:
@@ -32,6 +27,7 @@ class Grid:
         self.current_grid = self.configs.grids[grid_id]
         self.row = self.current_grid['row']
         self.col = self.current_grid['col']
+        # TODO use dict, more quickly?
         self.grid = []  # Monster or  Stone Object
         self.type_count = {}
         self.direct_states = {}  # able to eliminate (length more than 2)
@@ -61,12 +57,12 @@ class Grid:
                     index = random.choice(indexes)
 
                     monster = self.grid[index]
-                    monster.ref_id = self.transfer_monster(monster.ref_id)
+                    monster.ref_id = self.replace_monster_with_other(monster.ref_id)
             self.check_eliminate()
             if len(self.direct_states) == 0:
                 break
 
-    def transfer_monster(self, ref_id) -> str:
+    def replace_monster_with_other(self, ref_id) -> str:
         self.type_count[ref_id] -= 1
         ids = []
         for monster in self.configs.monsters:
@@ -75,26 +71,22 @@ class Grid:
         other_id = random.choice(ids)
         return other_id
 
-    # TODO The result satisfies the average distribution.
+    # TODO The monster satisfies the average distribution.
     def random_monster_ref(self) -> str:
-        return 'X'
-        # monster_dict = random.choice(self.configs.monsters)
-        # ref_id = monster_dict['id']
-        # self.type_count[ref_id] += 1
-        # return ref_id
-
-    def check_probably(self):
-        pass
+        # return 'X'
+        monster_dict = random.choice(self.configs.monsters)
+        ref_id = monster_dict['id']
+        self.type_count[ref_id] += 1
+        return ref_id
 
     def check_eliminate(self):
         self.direct_states = {}
+        self.probably_eliminate = {}
 
         self.check_east()
         self.check_south()
         self.check_north_east()
         self.check_south_east()
-
-        # self.direct_states
 
     def check_east(self):
         for x in range(self.row):
@@ -164,10 +156,11 @@ class Grid:
     def add_monster(self, temp, direct_type):
         if len(temp) < 2:
             return
+
         indexes = []
         for e in temp:
             indexes.append(e.index)
-        state = CellState(temp[0].ref_id, indexes)
+        state = CellState(temp[0].ref_id, indexes, direct_type)
 
         if len(temp) == 2:
             if direct_type not in self.probably_eliminate:
@@ -180,6 +173,73 @@ class Grid:
             self.direct_states[direct_type] = [state]
         else:
             self.direct_states[direct_type].append(state)
+
+    # 生成/掉落
+    def generate_new(self):
+        pass
+
+    # 交换和消除
+    def transfer_and_eliminate(self):
+        pass
+
+    # 记录上场
+    def record_monster(self):
+        pass
+
+    # 找出最佳方案
+    def best_plan_to_transfer(self):
+        pass
+
+    def get_alternative_monster(self) -> [CellVO]:
+        self.check_eliminate()
+
+        result = []
+        result.extend(self.cell_vo_by_successive())
+        result.extend(self.cell_vo_by_discontinuous())
+        return result
+
+    # xxo
+    def cell_vo_by_successive(self) -> [CellVO]:
+        ref_count = {}  # id -> [index]
+        for direct in self.probably_eliminate:
+            state_list = self.probably_eliminate[direct]
+            for cell in state_list:
+                pre = cell.get_pre(self)
+                next_ = cell.get_next(self)
+
+                if cell.ref_id not in ref_count:
+                    ref_count[cell.ref_id] = []
+
+                id_ = ref_count[cell.ref_id]
+                if pre is not None:
+                    id_.append(pre)
+                if next_ is not None:
+                    id_.append(next_)
+
+        result = []
+        for ref_id in ref_count:
+            indexes = ref_count[ref_id]
+            result.extend(self.get_repeated_indexes(ref_id, indexes))
+        return result
+
+    # TODO xxox xox
+    def cell_vo_by_discontinuous(self) -> [CellVO]:
+        return []
+
+    def get_repeated_indexes(self, ref_id, indexes) -> [CellVO]:
+        temp = {}
+        result = []
+        for index in indexes:
+            if index not in temp:
+                temp[index] = 1
+            else:
+                temp[index] = temp[index] + 1
+
+        for index in temp:
+            if temp[index] > 1 and self.grid[index].get_type() == CellType.MONSTER:
+                vo = CellVO(ref_id, index, temp[index])
+                result.append(vo)
+        return result
 
     def show(self):
         for i in range(self.row):
