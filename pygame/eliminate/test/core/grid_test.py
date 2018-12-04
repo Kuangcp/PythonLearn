@@ -66,7 +66,7 @@ class TestGrid(unittest.TestCase):
         grid.simple_show()
         # grid.show()
 
-        result = grid.get_alternative_monster()
+        result = grid.get_complex_swap_choice()
         for vo in result:
             print(vo)
 
@@ -78,9 +78,26 @@ class TestGrid(unittest.TestCase):
         grid.init_generate_grid()
 
         grid.simple_show()
-        result = grid.best_plan_to_transfer()
+        result = grid.best_plan_to_swap()
+
+        if len(result) == 0:
+            print('no swap')
         for i in result:
-            print('transfer ', i)
+            print('swap ', i)
+
+    def test_swap(self):
+        grid = Grid()
+        grid.init_generate_grid()
+
+        grid.simple_show()
+        result = grid.best_plan_to_swap()
+
+        if len(result) == 0:
+            print('no swap')
+            return
+        for i in result:
+            print('swap ', i)
+        grid.swap_and_eliminate(result)
 
 
 if __name__ == '__main__':

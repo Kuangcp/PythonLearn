@@ -30,6 +30,7 @@ class Grid:
         self.grid = []  # Monster or  Stone Object
         self.type_count = {}
 
+        # direct ->[CellState]
         self.direct_states = {}  # able to eliminate (length more than 2)
         self.probably_eliminate = {}  # probably to eliminate (length equal to 2)
 
@@ -194,26 +195,77 @@ class Grid:
             else:
                 self.direct_states[direct_type].append(state)
 
+    def main_loop(self, loop):
+        for i in range(loop):
+            self.init_generate_grid()
+            self.simple_show()
+            cells = self.best_plan_to_swap()
+            if len(cells) == 0:
+                return
+            self.swap_and_eliminate(cells)
+
     # 生成/掉落
     def generate_new(self):
-        pass
-
-    # 交换和消除
-    def transfer_and_eliminate(self):
         pass
 
     # 记录上场
     def record_monster(self):
         pass
 
-    def best_plan_to_transfer(self) -> (CellVO, CellVO):
+    # 交换和消除
+    def swap_and_eliminate(self, cell_vo_tuple):
+        if len(cell_vo_tuple) != 2:
+            return
+        self.swap_monster(cell_vo_tuple[0].index, cell_vo_tuple[1].index)
+        self.synthesize_monster()
+
+    def synthesize_monster(self):
+        self.check_eliminate()
+        temp = []
+        for direct in self.direct_states:
+            logging.debug('direct=%s %s' % (direct, self.direct_states[direct]))
+            temp.extend(self.direct_states[direct])
+
+        if len(temp) == 0:
+            return
+
+        result = {}
+        for state in temp:
+            key = (state.ref_id, state.order)
+            if key not in result:
+                result[key] = state
+            else:
+                result[key].indexes.extend(state.indexes)
+
+        for (ref_id, order) in result:
+            logging.debug(' %s' % (result[(ref_id, order)]))
+        
+
+    def swap_monster(self, one_index, other_index):
+        one = self.grid[one_index]
+        other = self.grid[other_index]
+
+        other.index = one_index
+        one.index = other_index
+
+        self.grid[one_index] = other
+        self.grid[other_index] = one
+
+    def best_plan_to_swap(self) -> (CellVO, CellVO):
         """
         找出最佳方案
         :return: (CellVO, CellVO) 需要交换的两个 cell
         """
-        cells = self.get_alternative_monster()
+        cells = self.get_complex_swap_choice()
         if len(cells) == 0:
-            logging.info("can't find any transfer")
+            monster = self.get_simple_swap_choice()
+            logging.debug('the way of find by simple %s' % monster)
+
+            if monster is None:
+                logging.info("can't find any swap")
+            else:
+                other_monster = self.get_completion_one(monster)
+                return monster, other_monster
             return ()
 
         if len(cells) > 1:
@@ -221,21 +273,20 @@ class Grid:
             out_ref_id = None
 
             for cell in cells:
-                # TODO can group by count, then compare all in order
-                logging.debug('expect in:%s actual out:%s %s' % (cell.ref_id, self.grid[cell.index].ref_id, cell.count))
-
+                # TODO can group by count, then compare all in order final find best choice
+                logging.debug('plan: %s expect in:%s actual out:%s count:%s'
+                              % (cell.index, cell.ref_id, self.grid[cell.index].ref_id, cell.count))
                 if first_cell is None:
                     first_cell = cell
                     out_ref_id = self.grid[cell.index].ref_id
                     continue
 
                 if out_ref_id == cell.ref_id and not self.is_intersect(first_cell, cell):
-                    # TODO 两个期望互不相交
                     return first_cell, cell
 
-        # TODO get one
         first = cells[0]
         cell = self.get_completion_one(first)
+        logging.debug('get one %s' % cell)
         if cell is not None:
             return first, cell
 
@@ -244,14 +295,19 @@ class Grid:
     def is_intersect(self, a, b) -> bool:
         cell_a = self.get_nearby_index_lists(a)
         cell_b = self.get_nearby_index_lists(b)
+        logging.debug('%s %s | %s %s' % (cell_a, b.index, a.index, cell_b))
+
         temp = []
         for indexes in cell_a:
             temp.extend(indexes)
+        if b.index in temp:
+            return True
 
+        temp = []
         for indexes in cell_b:
-            for index in indexes:
-                if index in temp:
-                    return True
+            temp.extend(indexes)
+        if a.index in temp:
+            return True
         return False
 
     # 根据 index 和 期望的ref_id 找出附近 最大的关联结构 [[index],[index]]
@@ -269,27 +325,53 @@ class Grid:
 
         return result
 
-    def get_completion_one(self, cell):
+    def get_completion_one(self, cell) -> Monster:
         """
         first find in outside , then find min count inside
         :param cell:
+        return monster
         """
         index_lists = self.get_nearby_index_lists(cell)
         temp = []
         for indexes in index_lists:
-            temp.extend(index_lists)
-        for cell in self.grid:
-            print(cell)
+            temp.extend(indexes)
 
-        return None
+        target = []
+        for monster in self.grid:
+            if monster.get_type() != CellType.MONSTER:
+                continue
+            if not monster.is_same(cell):
+                continue
+
+            if monster.index in temp:
+                logging.debug('ignore %s' % monster)
+            else:
+                logging.debug('monster=%s' % monster)
+                target.append(monster)
+        if len(target) != 0:
+            return random.choice(target)
+
+    def get_simple_swap_choice(self) -> Monster:
+        temp = []
+        for direct in self.probably_eliminate:
+            state_list = self.probably_eliminate[direct]
+            for state in state_list:
+                if len(state.indexes) > 1:
+                    if state.get_pre(self) is not None:
+                        temp.append(self.grid[state.get_pre(self)])
+                    if state.get_next(self) is not None:
+                        temp.append(self.grid[state.get_next(self)])
+                for monster in temp:
+                    if monster.get_type() == CellType.MONSTER:
+                        return monster
+                temp = []
 
     # 获取备选方案 按权重倒序排序
-    def get_alternative_monster(self) -> [CellVO]:
+    def get_complex_swap_choice(self) -> [CellVO]:
         self.check_eliminate()
 
         result = []
         result.extend(self.cell_vo_by_successive())
-        # result.extend(self.cell_vo_by_discontinuous())
         if len(result) != 0:
             result = sorted(result, key=lambda cell_vo: cell_vo.count, reverse=True)
         return result
@@ -321,11 +403,6 @@ class Grid:
             result.extend(self.get_repeated_indexes(ref_id, vo_tuple))
         return result
 
-    # # TODO xxox oxx, oxx xox
-    # def cell_vo_by_discontinuous(self) -> [CellVO]:
-    #
-    #     return []
-
     def get_repeated_indexes(self, ref_id, vo_tuple) -> [CellVO]:
         temp = {}  # ref_id_order->count
         result = []
@@ -335,14 +412,16 @@ class Grid:
                 index *= -1
                 base = 1 / 8
 
-            if index not in temp:
-                temp[(order, index)] = base
+            key = (order, index)
+            if key not in temp:
+                temp[key] = base
             else:
-                temp[(order, index)] = temp[(order, index)] + base
+                temp[key] = temp[key] + base
 
         for order, index in temp:
-            if temp[(order, index)] > 0.75 and self.grid[index].get_type() == CellType.MONSTER:
-                cell = CellVO(ref_id, order, index, temp[(order, index)])
+            key = (order, index)
+            if temp[key] > 0.75 and self.grid[index].get_type() == CellType.MONSTER:
+                cell = CellVO(ref_id, order, index, temp[key])
                 result.append(cell)
         return result
 

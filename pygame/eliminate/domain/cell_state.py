@@ -16,7 +16,7 @@ class CellState:
         self.next = None
 
     def __repr__(self) -> str:
-        return str(self.ref_id) + ' ' + str(self.indexes)
+        return '%s  %s %s' % (self.ref_id, self.order.string(), self.indexes)
 
     def get_pre(self, grid):
         if self.pre is not None:

@@ -1,5 +1,10 @@
 import unittest
 
+# 隐式返回None
+def add(a, b) -> int:
+    if a > 0:
+        return a + b
+
 
 # just temporary code
 class Tool(unittest.TestCase):
@@ -12,6 +17,10 @@ class Tool(unittest.TestCase):
         result = [1]
         a = [1, 4, 5]
         result.extend(a)
+        print(result)
+
+    def test_no_return(self):
+        result = add(-3, 4)
         print(result)
 
 

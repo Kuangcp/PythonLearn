@@ -9,8 +9,7 @@ class Monster:
         self.count = count  # 数量
 
     def __repr__(self) -> str:
-        return 'monster: index=' + str(self.index) + ' ref_id=' + str(self.ref_id) + \
-               ' order=' + self.order.string() + ' count=' + str(self.count)
+        return 'monster: index=%s ref_id=%s order=%s count=%s' % (self.index, self.ref_id, self.order.string(), self.count)
 
     @staticmethod
     def get_type():
@@ -18,7 +17,7 @@ class Monster:
 
     def show(self) -> str:
         return '[' + self.ref_id + ',' + self.order.string() + ',' + str(self.count) + ']'
-    
+
     def simple_show(self):
         return self.ref_id
 
