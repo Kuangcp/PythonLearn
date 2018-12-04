@@ -24,6 +24,6 @@ import logging
 # 移除一些日志处理器
 # logger.removeHandler(file_handler)
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(filename)s:%(lineno)d %(levelname)s %(message)s',
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s %(filename)s %(funcName)s-%(lineno)d | %(message)s',
                     datefmt='%H:%M:%S')

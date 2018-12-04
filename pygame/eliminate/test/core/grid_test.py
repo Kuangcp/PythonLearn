@@ -73,6 +73,15 @@ class TestGrid(unittest.TestCase):
         if len(result) == 0:
             print('There is no way to eliminate it.')
 
+    def test_best_plan(self):
+        grid = Grid()
+        grid.init_generate_grid()
+
+        grid.simple_show()
+        result = grid.best_plan_to_transfer()
+        for i in result:
+            print('transfer ', i)
+
 
 if __name__ == '__main__':
     unittest.main()

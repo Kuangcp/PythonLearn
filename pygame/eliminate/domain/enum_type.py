@@ -1,4 +1,9 @@
+import random
 from enum import Enum
+
+
+def random_order_type():
+    return random.choice(list(OrderType.__members__.values()))
 
 
 class OrderType(Enum):
@@ -13,6 +18,7 @@ class OrderType(Enum):
 
     def up(self):
         return OrderType(self.value + 1)
+
 
 class CellType(Enum):
     STONE = 0

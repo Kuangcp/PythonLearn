@@ -4,7 +4,7 @@ import random
 from core.main_config import MainConfig
 from domain.cell_state import CellState
 from domain.direct_type import DirectType
-from domain.enum_type import OrderType, CellType
+from domain.enum_type import OrderType, CellType, random_order_type
 from domain.monster import Monster
 from domain.stone import Stone
 from util.log import logging
@@ -15,11 +15,11 @@ STONE_DEFAULT_HP = 1
 class CellVO:
     def __init__(self, ref_id, index, count):
         self.index = index
-        self.ref_id = ref_id
+        self.ref_id = ref_id  # 期望替换过来的ref_id
         self.count = count  # 重叠的权重
 
     def __repr__(self) -> str:
-        return 'id=' + self.ref_id + ' index=' + str(self.index) + ' count=' + str(self.count)
+        return 'ref_id=' + self.ref_id + ' index=' + str(self.index) + ' count=' + str(self.count)
 
 
 class Grid:
@@ -31,6 +31,7 @@ class Grid:
         # TODO use dict, more quickly?
         self.grid = []  # Monster or  Stone Object
         self.type_count = {}
+        
         self.direct_states = {}  # able to eliminate (length more than 2)
         self.probably_eliminate = {}  # probably to eliminate (length equal to 2)
 
@@ -44,10 +45,10 @@ class Grid:
             type_ = data[index]
 
             if type_ == CellType.MONSTER.value:
-                self.grid.append(Monster(index, self.random_monster_ref(), OrderType.D, 1))
+                self.grid.append(self.create_monster(index))
             if type_ == CellType.STONE.value:
                 # TODO generate stone hp
-                self.grid.append(Stone(index, STONE_DEFAULT_HP))
+                self.grid.append(self.create_stone(index))
 
         while True:
             self.check_eliminate()
@@ -62,6 +63,12 @@ class Grid:
             self.check_eliminate()
             if len(self.direct_states) == 0:
                 break
+
+    def create_stone(self, index):
+        return Stone(index, STONE_DEFAULT_HP)
+
+    def create_monster(self, index):
+        return Monster(index, self.random_monster_ref(), random_order_type(), 1)
 
     def replace_monster_with_other(self, ref_id) -> str:
         self.type_count[ref_id] -= 1
@@ -144,7 +151,7 @@ class Grid:
             return []
 
         temp_ = temp[0]
-        logging.debug(str(cell) + ' <--> ' + str(temp_))
+        # logging.debug(str(cell) + ' <--> ' + str(temp_))
 
         if temp_.get_type() == cell.get_type() == CellType.MONSTER and temp_.is_same(cell):
             temp.append(cell)
@@ -159,10 +166,14 @@ class Grid:
         if len(temp) == 0:
             return
 
+        temp = sorted(temp, lambda a: a.order)
+        logging.debug('temp: %s' % temp)
+
         indexes = []
         for e in temp:
-            indexes.append(e.index)
-        state = CellState(temp[0].ref_id, indexes, direct_type)
+            if e.order == OrderType.A:
+                indexes.append(e.index)
+        state = CellState(temp[0].ref_id, indexes, temp[0].order, direct_type)
 
         if len(temp) <= 2:
             if direct_type not in self.probably_eliminate:
@@ -187,17 +198,61 @@ class Grid:
     def record_monster(self):
         pass
 
-    # 找出最佳方案
-    def best_plan_to_transfer(self) -> CellVO:
-        return self.get_alternative_monster()[0]
+    def best_plan_to_transfer(self) -> (CellVO, CellVO):
+        """
+        找出最佳方案
+        :return: (CellVO, CellVO) 需要交换的两个 cell
+        """
+        cells = self.get_alternative_monster()
+        if len(cells) == 0:
+            logging.info("can't find any transfer")
+            return ()
 
-    # 获取备选方案
+        if len(cells) > 1:
+            first_cell = None
+            out_ref_id = None
+
+            for cell in cells:
+                # TODO can group by count, then compare all in order
+                logging.debug('expect in:%s actual out:%s' % (cell.ref_id, self.grid[cell.index].ref_id))
+
+                if first_cell is None:
+                    first_cell = cell
+                    out_ref_id = self.grid[cell.index].ref_id
+                    continue
+
+                if out_ref_id == cell.ref_id:
+                    # TODO 两个期望互不相交
+                    return first_cell, cell
+
+        # TODO get one
+        first = cells[0]
+        cell = self.get_completion_one(first)
+        if cell is not None:
+            return first, cell
+
+        return ()
+
+    # 根据 index 和 期望的ref_id 找出附近 最大的关联结构
+    def get_nearby_cell(self, cell):
+        pass
+
+    def get_completion_one(self, cell) -> any:
+        for direct in self.probably_eliminate:
+            state_list = self.probably_eliminate[direct]
+            for cell in state_list:
+                print(cell)
+        return None
+
+    # 获取备选方案 权重倒序
     def get_alternative_monster(self) -> [CellVO]:
         self.check_eliminate()
 
         result = []
         result.extend(self.cell_vo_by_successive())
         # result.extend(self.cell_vo_by_discontinuous())
+        if len(result) != 0:
+            result = sorted(result, key=lambda cell_vo: cell_vo.count, reverse=True)
         return result
 
     # 分为 xo ox xx
@@ -208,6 +263,7 @@ class Grid:
             for cell in state_list:
                 pre = cell.get_pre(self)
                 next_ = cell.get_next(self)
+                # logging.debug('%s %s - %s' % (cell, pre, next_))
 
                 if cell.ref_id not in ref_count:
                     ref_count[cell.ref_id] = []
@@ -221,6 +277,8 @@ class Grid:
         result = []
         for ref_id in ref_count:
             indexes = ref_count[ref_id]
+            logging.debug('%s: %s' % (ref_id, str(indexes)))
+
             result.extend(self.get_repeated_indexes(ref_id, indexes))
         return result
 
@@ -241,7 +299,6 @@ class Grid:
                 temp[index] = base
             else:
                 temp[index] = temp[index] + base
-            print(ref_id, index, temp)
 
         for index in temp:
             if temp[index] > 1 and self.grid[index].get_type() == CellType.MONSTER:

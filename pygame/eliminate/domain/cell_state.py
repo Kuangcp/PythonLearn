@@ -5,9 +5,11 @@ def is_same_row(a, b, grid) -> bool:
     return int(a / grid.col) == int(b / grid.col)
 
 
+# 连续的结构
 class CellState:
-    def __init__(self, ref_id, indexes, direct_type):
+    def __init__(self, ref_id, indexes, order, direct_type):
         self.ref_id = ref_id
+        self.order = order
         self.indexes = indexes
         self.direct_type = direct_type
         self.pre = None
@@ -29,25 +31,56 @@ class CellState:
         return self.next
 
     def calculate_pre_and_next(self, grid):
-        if self.direct_type == DirectType.NORTH_EAST:
-            self.calculate_common(grid.col - 1, grid)
-        elif self.direct_type == DirectType.SOUTH_EAST:
-            self.calculate_common(grid.col + 1, grid)
-        elif self.direct_type == DirectType.SOUTH:
-            self.calculate_common(grid.col, grid)
-        elif self.direct_type == DirectType.EAST:
-            base = 1
-            if len(self.indexes) == 1:
-                base = -1
+        head = self.indexes[0]
+        tail = self.indexes[-1]
 
-            pre = self.indexes[0] - 1
-            if pre > 0 and is_same_row(pre, self.indexes[0], grid):
+        if self.direct_type == DirectType.NORTH_EAST:
+            self.calculate_north_east(grid, head, tail)
+        elif self.direct_type == DirectType.SOUTH_EAST:
+            self.calculate_south_east(grid, head, tail)
+        elif self.direct_type == DirectType.SOUTH:
+            self.calculate_south(grid.col, grid)
+        elif self.direct_type == DirectType.EAST:
+            self.calculate_east(grid, head, tail)
+
+    def calculate_east(self, grid, head, tail):
+        base = 1
+        if len(self.indexes) == 1:
+            base = -1
+        pre = head - 1
+        if pre > 0 and is_same_row(pre, head, grid):
+            self.pre = pre * base
+        next_ = tail + 1
+        if next_ < grid.row * grid.col and is_same_row(next_, tail, grid):
+            self.next = next_ * base
+
+    def calculate_south_east(self, grid, head, tail):
+        base = 1
+        if len(self.indexes) == 1:
+            base = -1
+        if head % grid.col != 0:
+            pre = head - (grid.col + 1)
+            if pre > 0:
                 self.pre = pre * base
-            next_ = self.indexes[-1] + 1
-            if next_ < grid.row * grid.col and is_same_row(next_, self.indexes[-1], grid):
+        if tail % grid.col != grid.col - 1:
+            next_ = tail + grid.col + 1
+            if next_ < grid.row * grid.col:
                 self.next = next_ * base
 
-    def calculate_common(self, delta, grid):
+    def calculate_north_east(self, grid, head, tail):
+        base = 1
+        if len(self.indexes) == 1:
+            base = -1
+        if head % grid.col != grid.col - 1:
+            pre = head - (grid.col - 1)
+            if pre > 0:
+                self.pre = pre * base
+        if tail % grid.col != 0:
+            next_ = tail + grid.col - 1
+            if next_ < grid.row * grid.col:
+                self.next = next_ * base
+
+    def calculate_south(self, delta, grid):
         base = 1
         if len(self.indexes) == 1:
             base = -1
