@@ -1,21 +1,19 @@
-import math
 import random
 
 from core.main_config import MainConfig
 from domain.cell_state import CellState
 from domain.direct_type import DirectType
-from domain.enum_type import OrderType, CellType, random_order_type
+from domain.enum_type import OrderType, CellType
 from domain.monster import Monster
 from domain.stone import Stone
 from util.log import logging
 
-STONE_DEFAULT_HP = 1
-
 
 class CellVO:
-    def __init__(self, ref_id, index, count):
+    def __init__(self, ref_id, order, index, count):
         self.index = index
         self.ref_id = ref_id  # 期望替换过来的ref_id
+        self.order = order  # 期望的order
         self.count = count  # 重叠的权重
 
     def __repr__(self) -> str:
@@ -31,7 +29,7 @@ class Grid:
         # TODO use dict, more quickly?
         self.grid = []  # Monster or  Stone Object
         self.type_count = {}
-        
+
         self.direct_states = {}  # able to eliminate (length more than 2)
         self.probably_eliminate = {}  # probably to eliminate (length equal to 2)
 
@@ -64,11 +62,12 @@ class Grid:
             if len(self.direct_states) == 0:
                 break
 
-    def create_stone(self, index):
-        return Stone(index, STONE_DEFAULT_HP)
+    @staticmethod
+    def create_stone(index):
+        return Stone(index, Stone.random_hp())
 
     def create_monster(self, index):
-        return Monster(index, self.random_monster_ref(), random_order_type(), 1)
+        return Monster(index, self.random_monster_ref(), OrderType.D, 1)
 
     def replace_monster_with_other(self, ref_id) -> str:
         self.type_count[ref_id] -= 1
@@ -166,14 +165,23 @@ class Grid:
         if len(temp) == 0:
             return
 
-        temp = sorted(temp, lambda a: a.order)
-        logging.debug('temp: %s' % temp)
+        temp = sorted(temp, key=lambda a: a.order.value)
 
         indexes = []
-        for e in temp:
-            if e.order == OrderType.A:
-                indexes.append(e.index)
-        state = CellState(temp[0].ref_id, indexes, temp[0].order, direct_type)
+        result = []
+        state = None
+        for i in range(len(temp)):
+            indexes.append(temp[i].index)
+            if i == 0:
+                state = CellState(temp[i].ref_id, indexes, temp[i].order, direct_type)
+                result.append(state)
+
+            elif temp[i].order != temp[i - 1].order:
+                state = CellState(temp[i].ref_id, indexes, temp[i].order, direct_type)
+                result.append(state)
+                indexes = []
+            else:
+                state.indexes = indexes
 
         if len(temp) <= 2:
             if direct_type not in self.probably_eliminate:
@@ -214,14 +222,14 @@ class Grid:
 
             for cell in cells:
                 # TODO can group by count, then compare all in order
-                logging.debug('expect in:%s actual out:%s' % (cell.ref_id, self.grid[cell.index].ref_id))
+                logging.debug('expect in:%s actual out:%s %s' % (cell.ref_id, self.grid[cell.index].ref_id, cell.count))
 
                 if first_cell is None:
                     first_cell = cell
                     out_ref_id = self.grid[cell.index].ref_id
                     continue
 
-                if out_ref_id == cell.ref_id:
+                if out_ref_id == cell.ref_id and not self.is_intersect(first_cell, cell):
                     # TODO 两个期望互不相交
                     return first_cell, cell
 
@@ -233,18 +241,49 @@ class Grid:
 
         return ()
 
-    # 根据 index 和 期望的ref_id 找出附近 最大的关联结构
-    def get_nearby_cell(self, cell):
-        pass
+    def is_intersect(self, a, b) -> bool:
+        cell_a = self.get_nearby_index_lists(a)
+        cell_b = self.get_nearby_index_lists(b)
+        temp = []
+        for indexes in cell_a:
+            temp.extend(indexes)
 
-    def get_completion_one(self, cell) -> any:
+        for indexes in cell_b:
+            for index in indexes:
+                if index in temp:
+                    return True
+        return False
+
+    # 根据 index 和 期望的ref_id 找出附近 最大的关联结构 [[index],[index]]
+    def get_nearby_index_lists(self, target) -> [[], []]:
+        current = target.index
+        result = []
+
         for direct in self.probably_eliminate:
             state_list = self.probably_eliminate[direct]
             for cell in state_list:
-                print(cell)
+                pre = cell.get_pre(self)
+                next_ = cell.get_next(self)
+                if pre == current or next_ == current:
+                    result.append(cell.indexes)
+
+        return result
+
+    def get_completion_one(self, cell):
+        """
+        first find in outside , then find min count inside
+        :param cell:
+        """
+        index_lists = self.get_nearby_index_lists(cell)
+        temp = []
+        for indexes in index_lists:
+            temp.extend(index_lists)
+        for cell in self.grid:
+            print(cell)
+
         return None
 
-    # 获取备选方案 权重倒序
+    # 获取备选方案 按权重倒序排序
     def get_alternative_monster(self) -> [CellVO]:
         self.check_eliminate()
 
@@ -257,7 +296,7 @@ class Grid:
 
     # 分为 xo ox xx
     def cell_vo_by_successive(self) -> [CellVO]:
-        ref_count = {}  # id -> [index]
+        vo_dict = {}  # id -> [(order,index)]
         for direct in self.probably_eliminate:
             state_list = self.probably_eliminate[direct]
             for cell in state_list:
@@ -265,21 +304,21 @@ class Grid:
                 next_ = cell.get_next(self)
                 # logging.debug('%s %s - %s' % (cell, pre, next_))
 
-                if cell.ref_id not in ref_count:
-                    ref_count[cell.ref_id] = []
+                if cell.ref_id not in vo_dict:
+                    vo_dict[cell.ref_id] = []
 
-                id_ = ref_count[cell.ref_id]
+                id_ = vo_dict[cell.ref_id]
                 if pre is not None:
-                    id_.append(pre)
+                    id_.append((cell.order, pre))
                 if next_ is not None:
-                    id_.append(next_)
+                    id_.append((cell.order, next_))
 
         result = []
-        for ref_id in ref_count:
-            indexes = ref_count[ref_id]
-            logging.debug('%s: %s' % (ref_id, str(indexes)))
+        for ref_id in vo_dict:
+            vo_tuple = vo_dict[ref_id]
+            # logging.debug('%s: %s' % (ref_id, str(vo_tuple)))
 
-            result.extend(self.get_repeated_indexes(ref_id, indexes))
+            result.extend(self.get_repeated_indexes(ref_id, vo_tuple))
         return result
 
     # # TODO xxox oxx, oxx xox
@@ -287,23 +326,24 @@ class Grid:
     #
     #     return []
 
-    def get_repeated_indexes(self, ref_id, indexes) -> [CellVO]:
-        temp = {}
+    def get_repeated_indexes(self, ref_id, vo_tuple) -> [CellVO]:
+        temp = {}  # ref_id_order->count
         result = []
-        for index in indexes:
+        for order, index in vo_tuple:
             base = 1
             if index < 0:
                 index *= -1
                 base = 1 / 8
-            if index not in temp:
-                temp[index] = base
-            else:
-                temp[index] = temp[index] + base
 
-        for index in temp:
-            if temp[index] > 1 and self.grid[index].get_type() == CellType.MONSTER:
-                vo = CellVO(ref_id, index, temp[index])
-                result.append(vo)
+            if index not in temp:
+                temp[(order, index)] = base
+            else:
+                temp[(order, index)] = temp[(order, index)] + base
+
+        for order, index in temp:
+            if temp[(order, index)] > 0.75 and self.grid[index].get_type() == CellType.MONSTER:
+                cell = CellVO(ref_id, order, index, temp[(order, index)])
+                result.append(cell)
         return result
 
     def show(self):

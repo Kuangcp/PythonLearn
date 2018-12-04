@@ -31,6 +31,9 @@ class CellState:
         return self.next
 
     def calculate_pre_and_next(self, grid):
+        if len(self.indexes) == 0:
+            return
+
         head = self.indexes[0]
         tail = self.indexes[-1]
 

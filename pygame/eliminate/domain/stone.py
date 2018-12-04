@@ -1,3 +1,5 @@
+import random
+
 from core.grid import CellType
 
 
@@ -8,6 +10,10 @@ class Stone:
 
     def __repr__(self) -> str:
         return 'stone: index=' + str(self.index) + ' hp=' + str(self.hp)
+
+    @staticmethod
+    def random_hp():
+        return int(random.random() * 7 + 1)
 
     @staticmethod
     def get_type():
