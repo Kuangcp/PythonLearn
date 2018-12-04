@@ -10,14 +10,14 @@ from util.log import logging
 
 
 class CellVO:
-    def __init__(self, ref_id, order, index, count):
+    def __init__(self, ref_id, order, index, weight):
         self.index = index
         self.ref_id = ref_id  # 期望替换过来的ref_id
         self.order = order  # 期望的order
-        self.count = count  # 重叠的权重
+        self.weight = weight  # 重叠的权重
 
     def __repr__(self) -> str:
-        return 'ref_id=' + self.ref_id + ' index=' + str(self.index) + ' count=' + str(self.count)
+        return 'ref_id=' + self.ref_id + ' index=' + str(self.index) + ' weight=' + str(self.weight)
 
 
 class Grid:
@@ -217,17 +217,16 @@ class Grid:
         if len(cell_vo_tuple) != 2:
             return
         self.swap_monster(cell_vo_tuple[0].index, cell_vo_tuple[1].index)
-        self.synthesize_monster()
+        removes = self.synthesize_monster()
+        self.eliminate_monster(removes)
 
-    def synthesize_monster(self):
+    def synthesize_monster(self) -> set:
         self.check_eliminate()
         temp = []
         for direct in self.direct_states:
-            logging.debug('direct=%s %s' % (direct, self.direct_states[direct]))
             temp.extend(self.direct_states[direct])
-
         if len(temp) == 0:
-            return
+            return set()
 
         result = {}
         for state in temp:
@@ -237,9 +236,26 @@ class Grid:
             else:
                 result[key].indexes.extend(state.indexes)
 
+        remove_indexes = None
         for (ref_id, order) in result:
-            logging.debug(' %s' % (result[(ref_id, order)]))
-        
+            value = result[(ref_id, order)]
+            indexes = set(value.indexes)
+
+            logging.debug('unit: %s %s %s' % (ref_id, order, indexes))
+            num = len(indexes)
+
+
+            if remove_indexes is None:
+                remove_indexes = indexes
+            else:
+                remove_indexes.union(indexes)
+
+        logging.debug('remove=%s' % remove_indexes)
+        return remove_indexes
+
+    def eliminate_monster(self, removes):
+        if len(removes) == 0:
+            return
 
     def swap_monster(self, one_index, other_index):
         one = self.grid[one_index]
@@ -274,8 +290,8 @@ class Grid:
 
             for cell in cells:
                 # TODO can group by count, then compare all in order final find best choice
-                logging.debug('plan: %s expect in:%s actual out:%s count:%s'
-                              % (cell.index, cell.ref_id, self.grid[cell.index].ref_id, cell.count))
+                logging.debug('plan: %s expect in:%s actual out:%s weight:%s'
+                              % (cell.index, cell.ref_id, self.grid[cell.index].ref_id, cell.weight))
                 if first_cell is None:
                     first_cell = cell
                     out_ref_id = self.grid[cell.index].ref_id
@@ -373,7 +389,7 @@ class Grid:
         result = []
         result.extend(self.cell_vo_by_successive())
         if len(result) != 0:
-            result = sorted(result, key=lambda cell_vo: cell_vo.count, reverse=True)
+            result = sorted(result, key=lambda cell_vo: cell_vo.weight, reverse=True)
         return result
 
     # 分为 xo ox xx
