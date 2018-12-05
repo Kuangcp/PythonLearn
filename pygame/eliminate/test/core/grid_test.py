@@ -1,3 +1,4 @@
+from util.logger import log
 import unittest
 
 from core.grid import Grid
@@ -42,6 +43,7 @@ class TestGrid(unittest.TestCase):
 
         # self.assertEqual(len(grid.grid), 36)
         grid.simple_show()
+        grid.show()
 
         grid.check_eliminate()
         for state in grid.direct_states:
@@ -81,23 +83,27 @@ class TestGrid(unittest.TestCase):
         result = grid.best_plan_to_swap()
 
         if len(result) == 0:
-            print('no swap')
+            log.error('no swap')
         for i in result:
-            print('swap ', i)
+            log.info('swap %s' % i)
 
     def test_swap(self):
-        grid = Grid()
+        grid = Grid(2)
         grid.init_generate_grid()
 
         grid.simple_show()
         result = grid.best_plan_to_swap()
 
         if len(result) == 0:
-            print('no swap')
+            log.warning('no swap')
             return
         for i in result:
-            print('swap ', i)
+            log.info('swap %s' % i)
         grid.swap_and_eliminate(result)
+
+        grid.simple_show()
+        grid.show()
+        grid.show_soldier()
 
 
 if __name__ == '__main__':

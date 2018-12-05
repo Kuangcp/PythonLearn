@@ -6,12 +6,16 @@ def random_order_type():
     return random.choice(list(OrderType.__members__.values()))
 
 
+def min_order_type():
+    return OrderType(1)
+
+
 class OrderType(Enum):
-    D = 1
-    C = 2
-    B = 3
-    A = 4
-    S = 5
+    E = 1
+    D = 2
+    C = 3
+    B = 4
+    A = 5
 
     def string(self) -> str:
         return str(self).replace('OrderType.', '')

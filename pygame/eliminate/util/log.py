@@ -24,6 +24,17 @@ import logging
 # 移除一些日志处理器
 # logger.removeHandler(file_handler)
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s %(filename)s %(funcName)s@%(lineno)d | %(message)s',
-                    datefmt='%H:%M:%S')
+# logging.basicConfig(level=logging.DEBUG,
+#                     # stream=sys.stdout,
+#
+#                     format='%(asctime)s %(levelname)s %(filename)s %(funcName)s@%(lineno)d | %(message)s',
+#                     datefmt='%H:%M:%S')
+
+
+# logging.basicConfig(level=logging.DEBUG,
+#                     format='\033[1;0m%(asctime)s %(levelname)-5s %(filename)s %(funcName)s@%(lineno)d |\033[1;32m  %(message)s \033[1;0m',
+#                     datefmt='%H:%M:%S')
+#
+# logging.addLevelName(logging.DEBUG, "\033[1;32m%s\033[1;0m" % logging.getLevelName(logging.DEBUG))
+# logging.addLevelName(logging.WARNING, "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.WARNING))
+# logging.addLevelName(logging.ERROR, "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.ERROR))
