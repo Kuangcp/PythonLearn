@@ -7,9 +7,9 @@ logging.addLevelName(logging.ERROR, "\033[1;31m%s\033[1;0m" % logging.getLevelNa
 
 log = logging.getLogger(__name__)
 formatter = logging.Formatter('\033[1;0m%(asctime)s %(levelname)-5s \033[1;37m%(filename)s'
-                              '\033[1;34m %(funcName)s\033[1;0m@%(lineno)d |\033[1;32m  %(message)s \033[1;0m')
+                              ' \033[1;0m%(funcName)s@\033[1;33m%(lineno)d \033[1;0m|\033[1;32m  %(message)s \033[1;0m')
 console_handler = logging.StreamHandler(sys.stdout)
 console_handler.formatter = formatter
 
 log.addHandler(console_handler)
-log.setLevel(logging.INFO)
+log.setLevel(logging.DEBUG)

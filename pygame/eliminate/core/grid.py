@@ -21,7 +21,7 @@ class CellVO:
         self.weight = weight  # 重叠的权重
 
     def __repr__(self) -> str:
-        return 'ref_id=' + self.ref_id + ' index=' + str(self.index) + ' weight=' + str(self.weight)
+        return 'ref_id=%s index=%s order=%s weight=%s' % (self.ref_id, self.index, self.order, self.weight)
 
 
 class Grid:
@@ -229,6 +229,7 @@ class Grid:
             if len(cells) == 0:
                 log.warning('can\'t find any swap plan')
                 break
+            log.info('best plan %s' % str(cells))
             self.swap_and_eliminate(cells)
         log.warning('complete loop: %s' % i)
         self.show()
@@ -350,7 +351,7 @@ class Grid:
         return space_indexes
 
     def swap_monster(self, one_index, other_index) -> bool:
-        # log.debug('swap %s %s' % (one_index, other_index))
+        log.info('swap %s %s' % (one_index, other_index))
         one = self.grid[one_index]
         other = self.grid[other_index]
 
@@ -394,16 +395,22 @@ class Grid:
                     out_ref_id = self.grid[cell.index].ref_id
                     continue
 
-                if out_ref_id == cell.ref_id and not self.is_intersect(first_cell, cell):
+                same_monster = self.is_same_monster(cell.index, first_cell.index)
+                if out_ref_id == cell.ref_id and not same_monster and not self.is_intersect(first_cell, cell):
+                    log.debug('two eliminate')
                     return first_cell, cell
 
         first = cells[0]
         cell = self.get_completion_one(first)
         log.debug('get one %s' % cell)
         if cell is not None:
+            log.debug('random other to eliminate')
             return first, cell
 
         return ()
+
+    def is_same_monster(self, index_one, index_other) -> bool:
+        return self.grid[index_one].is_same(self.grid[index_other])
 
     def is_intersect(self, a, b) -> bool:
         cell_a = self.get_nearby_index_lists(a)
@@ -485,7 +492,7 @@ class Grid:
 
         result = []
         result.extend(self.cell_vo_by_successive())
-        if len(result) != 0:
+        if len(result) > 1:
             result = sorted(result, key=lambda cell_vo: cell_vo.weight, reverse=True)
         return result
 

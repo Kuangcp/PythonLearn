@@ -10,6 +10,7 @@
 
 test.*
 sina.html
+*.log
 
 # C extensions
 *.so

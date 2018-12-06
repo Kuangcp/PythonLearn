@@ -12,9 +12,9 @@ class TestGrid(unittest.TestCase):
         self.assertEqual(len(grid.grid), 16)
 
         for cell in grid.grid:
-            print(str(cell))
+            log.debug(str(cell))
 
-        print(grid.type_count)
+        log.debug(grid.type_count)
 
         grid.show_detail()
 
@@ -104,8 +104,8 @@ class TestGrid(unittest.TestCase):
         grid.show()
 
     def test_main_loop(self):
-        grid = Grid(2)
-        grid.main_loop(3000)
+        grid = Grid()
+        grid.main_loop(5)
 
 
 if __name__ == '__main__':
