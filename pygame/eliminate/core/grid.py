@@ -21,7 +21,7 @@ class CellVO:
         self.weight = weight  # 重叠的权重
 
     def __repr__(self) -> str:
-        return 'ref_id=%s index=%s order=%s weight=%s' % (self.ref_id, self.index, self.order, self.weight)
+        return 'ref_id=%s index=%s order=%s weight=%s' % (self.ref_id, self.index, self.order.string(), self.weight)
 
 
 class Grid:
@@ -225,6 +225,7 @@ class Grid:
         for i in range(loop):
             log.info('loop %s' % i)
             self.table_show()
+
             cells = self.best_plan_to_swap()
             if len(cells) == 0:
                 log.warning('can\'t find any swap plan')
@@ -358,6 +359,9 @@ class Grid:
         if one.get_type() != CellType.MONSTER or other.get_type() != CellType.MONSTER:
             return False
 
+        if one.is_same(other):
+            return False
+
         other.index = one_index
         one.index = other_index
         self.grid[one_index] = other
@@ -383,22 +387,17 @@ class Grid:
             return ()
 
         if len(cells) > 1:
-            first_cell = None
-            out_ref_id = None
-
-            for cell in cells:
-                # TODO can group by count, then compare all in order final find best choice
-                log.debug('plan: %s expect in:%s actual out:%s weight:%s'
-                          % (cell.index, cell.ref_id, self.grid[cell.index].ref_id, cell.weight))
-                if first_cell is None:
-                    first_cell = cell
-                    out_ref_id = self.grid[cell.index].ref_id
-                    continue
-
-                same_monster = self.is_same_monster(cell.index, first_cell.index)
-                if out_ref_id == cell.ref_id and not same_monster and not self.is_intersect(first_cell, cell):
-                    log.debug('two eliminate')
-                    return first_cell, cell
+            max_effect = 0
+            cell_tuple = ()
+            for i in range(len(cells)):
+                for j in range(i + 1, len(cells) - 1):
+                    log.debug('%s <-> %s' % (cells[i], cells[j]))
+                    temp = self.calculate_swap_effect(cells[i].index, cells[j].index)
+                    if max_effect < temp:
+                        max_effect = temp
+                        cell_tuple = cells[i], cells[j]
+            if max_effect != 0:
+                return cell_tuple
 
         first = cells[0]
         cell = self.get_completion_one(first)
@@ -408,6 +407,26 @@ class Grid:
             return first, cell
 
         return ()
+
+    def calculate_swap_effect(self, index_one, index_other) -> int:
+        effect = 0
+        swap_result = self.swap_monster(index_one, index_other)
+        if not swap_result:
+            log.debug('swap failed')
+            return 0
+        self.check_eliminate()
+        for direct in self.direct_states:
+            for state in self.direct_states[direct]:
+                effect += state.order.value ** 3
+                target_level = 0
+                for index in state.indexes:
+                    monster = self.grid[index]
+                    target_level += monster.level
+                effect += (target_level - 3) * (state.order.value - 1) ** 3
+                log.debug('state %s effect=%s' % (state, effect))
+
+        self.swap_monster(index_one, index_other)
+        return effect
 
     def is_same_monster(self, index_one, index_other) -> bool:
         return self.grid[index_one].is_same(self.grid[index_other])
@@ -577,5 +596,6 @@ class Grid:
             log.info('%s |' % temp)
 
     def show_soldier(self):
+        # TODO merge
         for soldier in self.soldiers:
             log.info('%s' % soldier)

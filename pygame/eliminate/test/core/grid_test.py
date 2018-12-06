@@ -79,7 +79,7 @@ class TestGrid(unittest.TestCase):
         grid = Grid()
         grid.init_generate_grid()
 
-        grid.simple_show()
+        grid.show_detail()
         result = grid.best_plan_to_swap()
 
         if len(result) == 0:
@@ -104,8 +104,8 @@ class TestGrid(unittest.TestCase):
         grid.show()
 
     def test_main_loop(self):
-        grid = Grid()
-        grid.main_loop(5)
+        grid = Grid(2)
+        grid.main_loop(400)
 
 
 if __name__ == '__main__':
