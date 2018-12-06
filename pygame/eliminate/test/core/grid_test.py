@@ -88,7 +88,7 @@ class TestGrid(unittest.TestCase):
             log.info('swap %s' % i)
 
     def test_swap(self):
-        grid = Grid(2)
+        grid = Grid()
         grid.init_generate_grid()
 
         grid.simple_show()

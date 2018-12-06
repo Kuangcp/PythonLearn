@@ -257,7 +257,7 @@ class Grid:
             final_index.append(target_index)
 
             monster = Monster(target_index, ref_id, order.up(), level=target_level)
-            soldier = Soldier(ref_id, order, target_level, target_level - 1)
+            soldier = Soldier(ref_id, order, target_level - 1, target_level)
             self.soldiers.append(soldier)
             self.grid[target_index] = monster
 
@@ -516,13 +516,15 @@ class Grid:
             log.debug('%s' % temp)
 
     def simple_show(self):
-        log.debug('-' * (2 * self.col + 3))
+        log.debug('┏' + '━┳' * (self.col-1) + '━┓')
         for i in range(self.row):
-            temp = '|'
+            temp = '┃'
             for j in range(self.col):
-                temp += "%2s" % (self.grid[i * self.col + j].simple_show())
-            log.debug('%s |' % temp)
-        log.debug('-' * (2 * self.col + 3))
+                temp += "%s┃" % (self.grid[i * self.col + j].simple_show())
+            log.debug('%s' % temp)
+            if i != self.row-1:
+                log.debug('┣' + '━╋' * (self.col-1) + '━┫')
+        log.debug("┗" + '━┻' * (self.col-1) + "━┛")
 
     def show_soldier(self):
         for soldier in self.soldiers:
