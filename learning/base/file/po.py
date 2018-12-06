@@ -6,7 +6,6 @@ import time
 # 压缩文件的路径
 path = r'F:\\Myth_Notes\\Python\\Python.zip'
 
-
 # password='1234'
 
 def pojie_zip(path, password):

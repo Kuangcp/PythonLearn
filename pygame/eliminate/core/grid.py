@@ -1,5 +1,7 @@
+import logging
 import math
 import random
+import sys
 
 from core.main_config import MainConfig
 from domain.cell_state import CellState
@@ -84,13 +86,29 @@ class Grid:
         other_id = random.choice(ids)
         return other_id
 
-    # TODO The monster satisfies the average distribution.
     def random_monster_ref(self) -> str:
         # return 'X'
-        monster_dict = random.choice(self.configs.monsters)
-        ref_id = monster_dict['id']
+
+        # monster_dict = random.choice(self.configs.monsters)
+        # ref_id = monster_dict['id']
+        # self.type_count[ref_id] += 1
+        # return ref_id
+
+        ref_id = random.choice(self.get_monster_resources())
         self.type_count[ref_id] += 1
         return ref_id
+
+    def get_monster_resources(self) -> []:
+        result = []
+        max_count = max(self.type_count.values())
+
+        for ref_id in self.type_count:
+            if self.type_count[ref_id] != max_count:
+                result.append(ref_id)
+
+        if len(result) == 0:
+            return list(self.type_count.keys())
+        return result
 
     def check_eliminate(self):
         self.direct_states = {}
@@ -202,21 +220,30 @@ class Grid:
                 self.direct_states[direct_type].append(state)
 
     def main_loop(self, loop):
+        self.init_generate_grid()
+        i = 0
         for i in range(loop):
-            self.init_generate_grid()
-            self.simple_show()
+            log.info('loop %s' % i)
+            self.table_show()
             cells = self.best_plan_to_swap()
             if len(cells) == 0:
-                return
+                log.warning('can\'t find any swap plan')
+                break
             self.swap_and_eliminate(cells)
+        log.warning('complete loop: %s' % i)
+        self.show()
 
     # 生成/掉落
-    def generate_new(self):
-        pass
+    def generate_new(self, space_indexes):
+        for index in space_indexes:
+            monster = Monster(index, self.random_monster_ref(), min_order_type())
+            # log.debug('generate %s' % monster)
+            self.grid.__setitem__(index, monster)
 
-    # 记录上场
-    def record_monster(self):
-        pass
+    # 记录上场士兵
+    def record_monster(self, ref_id, order, target_level):
+        soldier = Soldier(ref_id, order, target_level - 1, target_level)
+        self.soldiers.append(soldier)
 
     # 交换和消除
     def swap_and_eliminate(self, cell_vo_tuple):
@@ -226,7 +253,9 @@ class Grid:
         removes = self.synthesize_monster()
 
         space_indexes = self.eliminate_monster(removes)
-        log.debug('space %s' % space_indexes)
+        self.table_show()
+        # log.debug('space %s' % space_indexes)
+        self.generate_new(space_indexes)
 
     # 合成
     def synthesize_monster(self) -> []:
@@ -255,11 +284,10 @@ class Grid:
             log.debug('synthesize unit: %s %s %s target_index %s' % (ref_id, order, indexes, target_index))
 
             final_index.append(target_index)
-
             monster = Monster(target_index, ref_id, order.up(), level=target_level)
-            soldier = Soldier(ref_id, order, target_level - 1, target_level)
-            self.soldiers.append(soldier)
             self.grid[target_index] = monster
+
+            self.record_monster(ref_id, order, target_level)
 
             if remove_indexes is None:
                 remove_indexes = indexes
@@ -380,7 +408,7 @@ class Grid:
     def is_intersect(self, a, b) -> bool:
         cell_a = self.get_nearby_index_lists(a)
         cell_b = self.get_nearby_index_lists(b)
-        log.debug('%s %s | %s %s' % (cell_a, b.index, a.index, cell_b))
+        # log.debug('%s %s | %s %s' % (cell_a, b.index, a.index, cell_b))
 
         temp = []
         for indexes in cell_a:
@@ -429,9 +457,10 @@ class Grid:
                 continue
 
             if monster.index in temp:
-                log.debug('ignore %s' % monster)
+                # log.debug('ignore %s' % monster)
+                pass
             else:
-                log.debug('monster=%s' % monster)
+                # log.debug('monster=%s' % monster)
                 target.append(monster)
         if len(target) != 0:
             return random.choice(target)
@@ -509,23 +538,37 @@ class Grid:
         return result
 
     def show(self):
+        log.setLevel(logging.INFO)
+        self.table_show()
+        self.show_detail()
+        self.show_soldier()
+        log.info('type count: %s' % self.type_count)
+
+    def show_detail(self):
         for i in range(self.row):
             temp = ''
             for j in range(self.col):
                 temp += "%8s" % (self.grid[i * self.col + j].show())
-            log.debug('%s' % temp)
+            log.info('%s' % temp)
 
-    def simple_show(self):
-        log.debug('┏' + '━┳' * (self.col-1) + '━┓')
+    def table_show(self):
+        log.info('┏' + '━┳' * (self.col - 1) + '━┓')
         for i in range(self.row):
             temp = '┃'
             for j in range(self.col):
                 temp += "%s┃" % (self.grid[i * self.col + j].simple_show())
-            log.debug('%s' % temp)
-            if i != self.row-1:
-                log.debug('┣' + '━╋' * (self.col-1) + '━┫')
-        log.debug("┗" + '━┻' * (self.col-1) + "━┛")
+            log.info('%s' % temp)
+            if i != self.row - 1:
+                log.info('┣' + '━╋' * (self.col - 1) + '━┫')
+        log.info("┗" + '━┻' * (self.col - 1) + "━┛")
+
+    def simple_show(self):
+        for i in range(self.row):
+            temp = '|'
+            for j in range(self.col):
+                temp += "%2s" % (self.grid[i * self.col + j].simple_show())
+            log.info('%s |' % temp)
 
     def show_soldier(self):
         for soldier in self.soldiers:
-            log.debug('%s' % soldier)
+            log.info('%s' % soldier)

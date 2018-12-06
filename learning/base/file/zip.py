@@ -1,7 +1,6 @@
 import os
 import zipfile
 
-
 def compress(zip_file, input_dir):
     f_zip = zipfile.ZipFile(zip_file, 'w')
     for root, dirs, files in os.walk(input_dir):
@@ -9,6 +8,7 @@ def compress(zip_file, input_dir):
             # 获取文件相对路径，在压缩包内建立相同的目录结构
             abs_path = os.path.join(os.path.join(root, f))
             rel_path = os.path.relpath(abs_path, os.path.dirname(input_dir))
+            print(abs_path)
             f_zip.write(abs_path, rel_path, zipfile.ZIP_STORED)
 
 
@@ -27,14 +27,15 @@ def printdir(zip_file):
     f_zip = zipfile.ZipFile(zip_file, 'r')
     print('== printdir() ============================')
     f_zip.printdir()
-    print
+    
     print('== namelist() ============================')
     for f in f_zip.namelist():
         print(f)
 
-
 if __name__ == '__main__':
-    zip_file = 'readability.zip'
-    compress(zip_file, os.path.join(os.getcwd(), 'readability'))
+    zip_file = 'resources.zip'
+    compress(zip_file, os.path.join(os.getcwd(), 'resources'))
     printdir(zip_file)
     extract(zip_file, 'output')
+
+# 压缩 resources 目录, 得到压缩包, 并解压到 output 目录

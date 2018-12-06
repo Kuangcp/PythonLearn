@@ -8,8 +8,7 @@
 *.png
 *.gif
 
-test.db
-test.txt
+test.*
 sina.html
 
 # C extensions

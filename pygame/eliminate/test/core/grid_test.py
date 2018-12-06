@@ -16,12 +16,12 @@ class TestGrid(unittest.TestCase):
 
         print(grid.type_count)
 
-        grid.show()
+        grid.show_detail()
 
     def test_show(self):
         grid = Grid()
         grid.init_generate_grid()
-        grid.show()
+        grid.show_detail()
 
         print('数量统计', grid.type_count)
 
@@ -29,7 +29,7 @@ class TestGrid(unittest.TestCase):
         grid = Grid(1)
         grid.init_generate_grid()
 
-        grid.show()
+        grid.show_detail()
         print('数量统计', grid.type_count)
 
         grid.check_eliminate()
@@ -43,7 +43,7 @@ class TestGrid(unittest.TestCase):
 
         # self.assertEqual(len(grid.grid), 36)
         grid.simple_show()
-        grid.show()
+        grid.show_detail()
 
         grid.check_eliminate()
         for state in grid.direct_states:
@@ -101,9 +101,11 @@ class TestGrid(unittest.TestCase):
             log.info('swap %s' % i)
         grid.swap_and_eliminate(result)
 
-        grid.simple_show()
         grid.show()
-        grid.show_soldier()
+
+    def test_main_loop(self):
+        grid = Grid(2)
+        grid.main_loop(3000)
 
 
 if __name__ == '__main__':
