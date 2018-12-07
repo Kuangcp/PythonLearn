@@ -1,3 +1,4 @@
+from domain.enum_type import StrategyType
 from util.logger import log
 import unittest
 
@@ -80,7 +81,7 @@ class TestGrid(unittest.TestCase):
         grid.init_generate_grid()
 
         grid.show_detail()
-        result = grid.best_plan_to_swap()
+        result = grid.swap_by_strategy(StrategyType.HIGH_ORDER_FIRST)
 
         if len(result) == 0:
             log.error('no swap')
@@ -92,7 +93,7 @@ class TestGrid(unittest.TestCase):
         grid.init_generate_grid()
 
         grid.simple_show()
-        result = grid.best_plan_to_swap()
+        result = grid.swap_by_strategy(StrategyType.HIGH_ORDER_FIRST)
 
         if len(result) == 0:
             log.warning('no swap')
@@ -105,7 +106,7 @@ class TestGrid(unittest.TestCase):
 
     def test_main_loop(self):
         grid = Grid(2)
-        grid.main_loop(400)
+        grid.main_loop(1000, StrategyType.HIGH_ORDER_FIRST)
 
 
 if __name__ == '__main__':

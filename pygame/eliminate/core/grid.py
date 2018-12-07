@@ -1,27 +1,17 @@
 import logging
 import math
 import random
-import sys
 
 from core.main_config import MainConfig
+from core.strategy import high_order_first
 from domain.cell_state import CellState
+from domain.cell_vo import CellVO
 from domain.direct_type import DirectType
-from domain.enum_type import OrderType, CellType, min_order_type
+from domain.enum_type import CellType, min_order_type, StrategyType, OrderType
 from domain.monster import Monster
 from domain.soldier import Soldier
 from domain.stone import Stone
 from util.logger import log
-
-
-class CellVO:
-    def __init__(self, ref_id, order, index, weight):
-        self.index = index
-        self.ref_id = ref_id  # 期望替换过来的ref_id
-        self.order = order  # 期望的order
-        self.weight = weight  # 重叠的权重
-
-    def __repr__(self) -> str:
-        return 'ref_id=%s index=%s order=%s weight=%s' % (self.ref_id, self.index, self.order.string(), self.weight)
 
 
 class Grid:
@@ -38,7 +28,7 @@ class Grid:
         self.direct_states = {}  # able to eliminate (length more than 2)
         self.probably_eliminate = {}  # probably to eliminate (length equal to 2)
 
-        self.soldiers = []  # synthesizer then go on battle
+        self.soldiers = {}  # (ref_id, order,level) -> soldier synthesizer then go on battle
 
         # init monster count
         for monster in self.configs.monsters:
@@ -219,19 +209,21 @@ class Grid:
             else:
                 self.direct_states[direct_type].append(state)
 
-    def main_loop(self, loop):
+    def main_loop(self, loop, strategy_type):
         self.init_generate_grid()
         i = 0
         for i in range(loop):
             log.info('loop %s' % i)
             self.table_show()
 
-            cells = self.best_plan_to_swap()
+            cells = self.swap_by_strategy(strategy_type)
             if len(cells) == 0:
                 log.warning('can\'t find any swap plan')
                 break
             log.info('best plan %s' % str(cells))
+
             self.swap_and_eliminate(cells)
+
         log.warning('complete loop: %s' % i)
         self.show()
 
@@ -243,21 +235,28 @@ class Grid:
             self.grid.__setitem__(index, monster)
 
     # 记录上场士兵
-    def record_monster(self, ref_id, order, target_level):
-        soldier = Soldier(ref_id, order, target_level - 1, target_level)
-        self.soldiers.append(soldier)
+    def record_soldier(self, ref_id, order, target_level):
+        if (ref_id, order, target_level - 1) in self.soldiers:
+            self.soldiers[(ref_id, order, target_level - 1)].count += target_level
+        else:
+            soldier = Soldier(ref_id, order, target_level - 1, target_level)
+            self.soldiers[(ref_id, order, target_level - 1)] = soldier
 
     # 交换和消除
     def swap_and_eliminate(self, cell_vo_tuple):
         if len(cell_vo_tuple) != 2:
             return
         self.swap_monster(cell_vo_tuple[0].index, cell_vo_tuple[1].index)
-        removes = self.synthesize_monster()
 
-        space_indexes = self.eliminate_monster(removes)
-        self.table_show()
-        # log.debug('space %s' % space_indexes)
-        self.generate_new(space_indexes)
+        while True:
+            removes = self.synthesize_monster()
+            if len(removes) == 0:
+                break
+            space_indexes = self.eliminate_monster(removes)
+
+            self.table_show()
+            # log.debug('space %s' % space_indexes)
+            self.generate_new(space_indexes)
 
     # 合成
     def synthesize_monster(self) -> []:
@@ -279,6 +278,10 @@ class Grid:
         final_index = []
         remove_indexes = None
         for (ref_id, order) in result:
+            if order == OrderType.A:
+                log.warning('up the top order %s %s' % (ref_id, result[(ref_id, order)]))
+                continue
+
             value = result[(ref_id, order)]
             indexes = set(value.indexes)
             target_index, target_level = self.get_synthesize_index_level(indexes)
@@ -289,7 +292,7 @@ class Grid:
             monster = Monster(target_index, ref_id, order.up(), level=target_level)
             self.grid[target_index] = monster
 
-            self.record_monster(ref_id, order, target_level)
+            self.record_soldier(ref_id, order, target_level)
 
             if remove_indexes is None:
                 remove_indexes = indexes
@@ -352,7 +355,7 @@ class Grid:
         return space_indexes
 
     def swap_monster(self, one_index, other_index) -> bool:
-        log.info('swap %s %s' % (one_index, other_index))
+        log.debug('swap %s %s' % (one_index, other_index))
         one = self.grid[one_index]
         other = self.grid[other_index]
 
@@ -360,6 +363,7 @@ class Grid:
             return False
 
         if one.is_same(other):
+            log.warning('swap same %s<->%s' % (one, other))
             return False
 
         other.index = one_index
@@ -369,44 +373,18 @@ class Grid:
 
         return True
 
-    def best_plan_to_swap(self) -> (CellVO, CellVO):
+    def swap_by_strategy(self, strategy_type) -> (CellVO, CellVO):
         """
-        找出最佳方案
+        依据策略找出最佳方案
         :return: (CellVO, CellVO) 需要交换的两个 cell
         """
-        cells = self.get_complex_swap_choice()
-        if len(cells) == 0:
-            monster = self.get_simple_swap_choice()
-            log.debug('the way of find by simple %s' % monster)
+        # TODO 完善策略
+        log.setLevel(logging.DEBUG)
 
-            if monster is None:
-                log.info("can't find any swap")
-            else:
-                other_monster = self.get_completion_one(monster)
-                return monster, other_monster
-            return ()
+        if strategy_type == StrategyType.HIGH_ORDER_FIRST:
+            return high_order_first.best_plan_to_swap(self)
 
-        if len(cells) > 1:
-            max_effect = 0
-            cell_tuple = ()
-            for i in range(len(cells)):
-                for j in range(i + 1, len(cells) - 1):
-                    log.debug('%s <-> %s' % (cells[i], cells[j]))
-                    temp = self.calculate_swap_effect(cells[i].index, cells[j].index)
-                    if max_effect < temp:
-                        max_effect = temp
-                        cell_tuple = cells[i], cells[j]
-            if max_effect != 0:
-                return cell_tuple
-
-        first = cells[0]
-        cell = self.get_completion_one(first)
-        log.debug('get one %s' % cell)
-        if cell is not None:
-            log.debug('random other to eliminate')
-            return first, cell
-
-        return ()
+        log.setLevel(logging.INFO)
 
     def calculate_swap_effect(self, index_one, index_other) -> int:
         effect = 0
@@ -548,7 +526,7 @@ class Grid:
             base = 1
             if index < 0:
                 index *= -1
-                base = 1 / 8
+                base = 1 / 2
 
             key = (order, index)
             if key not in temp:
@@ -596,6 +574,14 @@ class Grid:
             log.info('%s |' % temp)
 
     def show_soldier(self):
-        # TODO merge
-        for soldier in self.soldiers:
+        result = []
+        for (ref_id, order, level) in self.soldiers:
+            result.append(self.soldiers[(ref_id, order, level)])
+            # log.info('%s' % self.soldiers[(ref_id, order, level)])
+
+        result = sorted(result, key=lambda soldiers: soldiers.order.value, reverse=True)
+        count = 0
+        for soldier in result:
             log.info('%s' % soldier)
+            count += soldier.count
+        log.info('count=%s' % count)
