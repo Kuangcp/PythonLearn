@@ -12,4 +12,4 @@ console_handler = logging.StreamHandler(sys.stdout)
 console_handler.formatter = formatter
 
 log.addHandler(console_handler)
-log.setLevel(logging.INFO)
+log.setLevel(logging.WARNING)

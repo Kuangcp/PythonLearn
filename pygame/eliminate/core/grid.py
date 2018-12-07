@@ -299,8 +299,11 @@ class Grid:
             else:
                 remove_indexes = indexes.union(remove_indexes)
 
-        result = []
         log.info('synthesize:%s remove:%s' % (final_index, remove_indexes))
+        if remove_indexes is None:
+            return []
+
+        result = []
         for index in remove_indexes:
             if index not in final_index:
                 result.append(index)
@@ -363,7 +366,7 @@ class Grid:
             return False
 
         if one.is_same(other):
-            log.warning('swap same %s<->%s' % (one, other))
+            # log.warning('swap same %s<->%s' % (one, other))
             return False
 
         other.index = one_index
@@ -379,12 +382,12 @@ class Grid:
         :return: (CellVO, CellVO) 需要交换的两个 cell
         """
         # TODO 完善策略
-        log.setLevel(logging.DEBUG)
+        # log.setLevel(logging.DEBUG)
 
         if strategy_type == StrategyType.HIGH_ORDER_FIRST:
             return high_order_first.best_plan_to_swap(self)
 
-        log.setLevel(logging.INFO)
+        # log.setLevel(logging.INFO)
 
     def calculate_swap_effect(self, index_one, index_other) -> int:
         effect = 0

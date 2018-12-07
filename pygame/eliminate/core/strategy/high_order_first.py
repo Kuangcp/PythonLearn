@@ -2,7 +2,7 @@ from domain.cell_vo import CellVO
 from util.logger import log
 
 
-def best_plan_to_swap(grid) ->(CellVO, CellVO):
+def best_plan_to_swap(grid) -> (CellVO, CellVO):
     cells = grid.get_complex_swap_choice()
     log.debug('swap choice %s' % cells)
     if len(cells) == 0:
@@ -37,4 +37,3 @@ def best_plan_to_swap(grid) ->(CellVO, CellVO):
         return first, cell
 
     return ()
-
