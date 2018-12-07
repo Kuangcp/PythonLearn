@@ -24,4 +24,5 @@
 3. 交换完后 检测三消,  消除并合成,  然后补齐元素,  再检测三消 消除 直至 不能三消为止
 4. 循环 2 和 3 直至找不到三消的方案
 
+> 运行 py -m unittest grid_test.TestGrid.test_main_loop
 
