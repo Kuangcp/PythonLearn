@@ -105,8 +105,8 @@ class TestGrid(unittest.TestCase):
         grid.show()
 
     def test_main_loop(self):
-        grid = Grid(3)
-        grid.main_loop(30, StrategyType.HIGH_ORDER_FIRST)
+        grid = Grid()
+        grid.main_loop(4, StrategyType.HIGH_ORDER_FIRST)
 
 
 if __name__ == '__main__':
