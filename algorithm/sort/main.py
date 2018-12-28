@@ -2,14 +2,14 @@ import datetime
 import random
 import sys
 
-import sort_box as box
-import sort_bubble as bubble
-import sort_insert as insert
-import sort_select as select
-import sort_shell as shell
-import sort_merge as merge
-import sort_quick as quick
-import sort_heap as heap
+import sort.sort_box as box
+import sort.sort_bubble as bubble
+import sort.sort_insert as insert
+import sort.sort_select as select
+import sort.sort_shell as shell
+import sort.sort_merge as merge
+import sort.sort_quick as quick
+import sort.sort_heap as heap
 
 '''
     参数： [数量] [范围][排序类别][c 检查/s 展示]

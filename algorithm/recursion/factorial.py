@@ -9,7 +9,7 @@ def simple(n):
         return n * simple(n-1)
 
 def factorial(n, result=1):
-    ''' 尾递归, 直接返回函数'''
+    ''' 尾递归, 直接调用函数并返回'''
     if n == 1:
         return result
     else:
