@@ -1,4 +1,5 @@
-import sort_insert as insert
+import sort.sort_insert as insert
+
 '''
     TimSort python列表内置的就是该算法的实现:
         结合了合并排序和插入排序得到的算法
@@ -20,7 +21,11 @@ import sort_insert as insert
     2. runLen[n-1] > runLen[n]
     则利用归并排序将其中最短的2个run合并成一个新run，最终栈空的时候排序也就完成了。
 '''
-def tim(data):
+
+
+def sort(data):
     return data
 
 
+def name() -> str:
+    return "tim"

@@ -1,5 +1,5 @@
 import random
-import sort_insert as insert
+import sort.sort_insert as insert
 
 '''
  * shell排序，从小到大
@@ -15,28 +15,33 @@ import sort_insert as insert
 '''
 
 
-def shell(data):
-    size = random.randint(1, len(data)) # 随机分组
+def sort(data):
+    size = random.randint(1, len(data))  # 随机分组
     # print('首次分组：',size)
     # 一轮分组
-    devide_group(data, size)
+    divide_group(data, size)
     # 不断的将组减小，直至只有一个组
     while not size == 1:
-        size = random.randint(1, size-1)
+        size = random.randint(1, size - 1)
         # print('分组：',size)
-        data = devide_group(data, size)
+        data = divide_group(data, size)
     return data
 
-def devide_group(data, size):
+
+def divide_group(data, size):
     temp = []
     for j in range(0, size):
         elem = []
         for i in range(0, len(data)):
             if i % size == j:
                 elem.append(data[i])
-        elem = insert.insert(elem)
+        elem = insert.sort(elem)
         temp.append(elem)
     data = []
     for group in temp:
         data += group
     return data
+
+
+def name() -> str:
+    return "shell"

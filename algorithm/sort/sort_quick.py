@@ -1,4 +1,5 @@
 import sys
+
 '''
     快速排序： 建立左右指针位， 先右边比较，将右边的最高位和 参照值比较， 比参照值大就交换，比参照值小就高位指针下移，
         移动到当低位和高位指针相等就退出比较循环，并且进入左边比较的过程，
@@ -16,14 +17,17 @@ import sys
     有问题存在，当数据量达到 20000 就要好久,, ee 是程序的锅，是对算法没理解好
     优缺点： 当数据重复大，就会慢一些
 '''
-def quick(data):
-    sys.setrecursionlimit(100000) # 设置最大递归深度
+
+
+def sort(data):
+    sys.setrecursionlimit(100000)  # 设置最大递归深度
     # return sort(data, 0, len(data)-1)
-    return quickSort(data, 0, len(data)-1)
+    return quick_sort(data, 0, len(data) - 1)
+
 
 # 高效无误的写法
-def quickSort(L, low, high):
-    i = low 
+def quick_sort(L, low, high):
+    i = low
     j = high
     # 不合理的区间不做操作
     if i >= j:
@@ -32,31 +36,32 @@ def quickSort(L, low, high):
     while i < j:
         # 找出右边小于低位所在的标识值
         while i < j and L[j] >= key:
-            j = j-1         
-        # print('--',i,j,L)        
+            j = j - 1
+            # print('--',i,j,L)
         L[i] = L[j]
         # print('>=',i,j,L)
         # 找出左边大于标识值
-        while i < j and L[i] <= key:    
-            i = i+1 
-        # print('--',i,j,L)
+        while i < j and L[i] <= key:
+            i = i + 1
+            # print('--',i,j,L)
         L[j] = L[i]
         # print('<=',i,j,L)
-    L[i] = key 
+    L[i] = key
     # print(L)
-    quickSort(L, low, i-1)
-    quickSort(L, j+1, high)
+    quick_sort(L, low, i - 1)
+    quick_sort(L, j + 1, high)
     return L
 
+
 # 低效有bug
-def sort(data, low, high):
+def slow_sort(data, low, high):
     index_low = low
     index_high = high
     povit = data[low]
     # print('函数入口',index_low, index_high, low, high, data)
 
     while index_low < index_high:
-        povit = data[index_low] # 更新参照指针位
+        povit = data[index_low]  # 更新参照指针位
         # print('进入左边')
         while index_low < index_high and data[index_high] >= povit:
             # print(index_low, index_high, data[index_high], povit)
@@ -68,7 +73,7 @@ def sort(data, low, high):
             data[index_low] = temp
             index_low += 1
         # print(index_low, index_high, data)
-        
+
         # print('进入右边')
         # index_high = high
         while index_low < index_high and data[index_low] <= povit:
@@ -81,14 +86,18 @@ def sort(data, low, high):
             data[index_low] = temp
             index_high -= 1
         # print('一轮循环结束', index_low, index_high, data)
-        
+
         # 为什么要把指针高位恢复成入参初始的高位
         if index_low == index_high:
             index_high = high
             index_low += 1
     # print('循环结束', index_low, index_high,'--', low, high, data)
     if index_low > low:
-        sort(data, low, index_low-1)
+        slow_sort(data, low, index_low - 1)
     if index_high > high:
-        sort(data, index_low+1, high)
+        slow_sort(data, index_low + 1, high)
     return data
+
+
+def name() -> str:
+    return "quick"

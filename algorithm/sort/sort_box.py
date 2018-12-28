@@ -9,12 +9,12 @@
 """
 
 
-def box(data) -> []:
-    maxValue = data[0]
+def sort(data) -> []:
+    max_value = data[0]
     for i in range(1, len(data)):
-        if maxValue < data[i]:
-            maxValue = data[i]
-    length = len(str(maxValue))  # 得到数据最大位数
+        if max_value < data[i]:
+            max_value = data[i]
+    length = len(str(max_value))  # 得到数据最大位数
 
     for loop in range(1, length + 1):
         data_dict = {}
@@ -31,3 +31,7 @@ def box(data) -> []:
             if i in data_dict:
                 data.extend(data_dict[i])
     return data
+
+
+def name() -> str:
+    return "box"
