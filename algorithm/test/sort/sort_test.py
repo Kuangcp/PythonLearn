@@ -82,18 +82,26 @@ class TestPerformance(unittest.TestCase):
     def test_all_sort(self):
         global max_num_value, sort_scale
 
-        max_num_value = 10000
-        sort_scale = 300
+        max_num_value = 100000000
+        sort_scale = 5000
 
+        start = get_time()
         data = generate_data()
+        waste = get_time(start)
+        print('generate data: %s'%waste)
 
         result = {}
+        sort_start = get_time()
         for sort in all_sorts:
             # print('sort: %-7s' % (sort.name()), end='  |')
+            target_data = data[:]
             start = get_time()
-            sort.sort(data[:])
+            sort.sort(target_data)
             result[sort.name()] = get_time(start)
-
+        
+        # TODO 总时间对不上
+        print("all sort: ", get_time(sort_start))
+        
         sort_result = sorted(result.items(), key=lambda d: d[1], reverse=True)
         for key, value in sort_result:
             print('|%-7s  | %s ms' % (key, value / 1000))
