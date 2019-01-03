@@ -2,17 +2,19 @@
     厄拉多塞筛 是一种计算小于N的所有素数的方法：
         先得到一个2-N的列表，然后从最小的整数i开始，删除i，2i, 3i...... 当 i > 根号N 算法终止
 '''
-def erastothenes(n):
+def erastothenes(n)->[]:
     if n <= 1:
         print('没有符合条件的素数')
-        return 0
+        return []
     elif n <= 2:
-        print('2')
-        return 0
+        return [2]
+
+    result=[]
     lists = [i for i in range(2, n)]
+    
     while lists[0] <= n and len(lists)>=1:
         low = temp = lists[0]
-        print(low,' ', end="")
+        result.append(low)
         if len(lists) == 1:
             break
         i = 2
@@ -24,5 +26,4 @@ def erastothenes(n):
                 pass
             temp = i * low
             i += 1
-    print()
-erastothenes(int(input("请输入值")))
+    return result
