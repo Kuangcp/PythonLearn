@@ -12,7 +12,7 @@ import sort.sort_quick as quick
 import sort.sort_heap as heap
 
 max_num_value = 1000
-sort_scale = 10
+sort_scale = 100
 
 all_sorts = [box, bubble, insert, select, shell, merge, quick, heap]
 
