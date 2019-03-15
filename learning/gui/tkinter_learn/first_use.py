@@ -1,14 +1,14 @@
-# import tkinter as tk
-# import tkMessageBox
+# from tkinter import *
+# root = Tk()
 
-# top = tk.Tk()
-# top.mainloop()
+# def line(text):
+#     Label(root, text=text).pack()
 
-# class Application(Frame):
-#     def __init__(self, master=None):
-#         Frame.__init__(self,master)
+# line('hello world')
 
+# root.mainloop()
 
+###############################
 # from tkinter import *
 # root = Tk()
 
@@ -43,16 +43,3 @@
 # root.config(menu=menubar)
 
 # mainloop()
-
-from tkinter import *
-
-root = Tk()
-
-
-def line(text):
-    Label(root, text=text).pack()
-
-line('890t345gergredfgdf')
-line('890t345gergredfgddfsff')
-
-root.mainloop()
