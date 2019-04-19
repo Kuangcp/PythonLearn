@@ -25,7 +25,7 @@ _第一次运行_
 1. 构建镜像 `docker build -t record . `
 2. 构建redis容器 `docker run  --name redis_server -p 6666:6379 redis:alpine`
 3. 将redis容器连接该容器并启动 `docker run --name test -d -p 22333:22334 --link redis_server:db record`
-4. 访问 localhost:22333/static/key/index.html
+4. 访问 [localhost:22333/static/key/index.html](http://localhost:22333/static/key/index.html)
     - 访问后, host填db即可, 端口则是 6379
 
 ### 按键分析模块
