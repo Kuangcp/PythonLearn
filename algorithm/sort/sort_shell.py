@@ -14,6 +14,7 @@ import sort.sort_insert as insert
     其中最好的序列是 1,5,19,41,109.... 序列的通项公式是 9*4**i - 9*2**i + 1 或者是 4**i-3*2**i+1
 '''
 
+
 def sort(data):
     size = random.randint(2, len(data))
     # print('首次分组：',size)

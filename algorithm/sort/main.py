@@ -2,7 +2,7 @@ import datetime
 import random
 import sys
 
-import sort.sort_box as box
+import sort.sort_radix as box
 import sort.sort_bubble as bubble
 import sort.sort_insert as insert
 import sort.sort_select as select

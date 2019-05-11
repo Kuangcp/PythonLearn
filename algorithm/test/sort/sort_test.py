@@ -2,7 +2,7 @@ import datetime
 import unittest
 import random
 
-import sort.sort_box as box
+import sort.sort_radix as radix
 import sort.sort_bubble as bubble
 import sort.sort_insert as insert
 import sort.sort_select as select
@@ -14,7 +14,7 @@ import sort.sort_heap as heap
 max_num_value = 1000
 sort_scale = 100
 
-all_sorts = [box, bubble, insert, select, shell, merge, quick, heap]
+all_sorts = [radix, bubble, insert, select, shell, merge, quick, heap]
 
 
 def generate_data():
@@ -43,8 +43,8 @@ def get_time(start=None):
 class TestSortCorrect(unittest.TestCase):
     """测试排序算法正确性"""
 
-    def test_box_sort(self):
-        result = box.sort(generate_data())
+    def test_radix_sort(self):
+        result = radix.sort(generate_data())
         assert check_sorted(result)
 
     def test_bubble_sort(self):
@@ -83,12 +83,12 @@ class TestPerformance(unittest.TestCase):
         global max_num_value, sort_scale
 
         max_num_value = 100000000
-        sort_scale = 5000
+        sort_scale = 500
 
         start = get_time()
         data = generate_data()
         waste = get_time(start)
-        print('generate data: %s'%waste)
+        print('generate data: %s' % waste)
 
         result = {}
         sort_start = get_time()
@@ -98,10 +98,10 @@ class TestPerformance(unittest.TestCase):
             start = get_time()
             sort.sort(target_data)
             result[sort.name()] = get_time(start)
-        
+
         # TODO 总时间对不上
-        print("all sort: ", get_time(sort_start))
-        
+        print("all sort start: ", get_time(sort_start))
+
         sort_result = sorted(result.items(), key=lambda d: d[1], reverse=True)
         for key, value in sort_result:
             print('|%-7s  | %s ms' % (key, value / 1000))

@@ -1,11 +1,12 @@
 """
-    箱排序，也称桶排序，属于基数排序，其基本思想是：
+    箱排序，也称桶排序，基数排序，其基本思想是：
         设置若干箱子，依次扫描数据， 将关键字等于k的记录全部放入第k箱子， 然后再将箱子首尾连接（收集）
         例如对数值排序,以位数上的数值为键，先0-9十个箱子，只看个位数，排好，连接，
             然后0-9十个箱子十位数， 排好连接，循环直至最大位结束
         那么就要先得到最大数，然后才能确定位数，才能确定循环次数
 
-    优点， 在数据小，量大时排序非常快，需要比较(log10 n)*n次 时间复杂度是O(n) 空间复杂度是2n
+    优点， 在数据小，量大时排序非常快
+    需要比较(log10 n)*n次 时间复杂度是O(n) 空间复杂度是2n
 """
 
 
@@ -16,11 +17,11 @@ def sort(data) -> []:
             max_value = data[i]
     length = len(str(max_value))  # 得到数据最大位数
 
-    for loop in range(1, length + 1):
+    for loop in range(0, length):
         data_dict = {}
 
         for num in data:
-            box_type = int((num / (10 ** (loop - 1)))) % 10
+            box_type = int(num / (10 ** loop )) % 10
             if box_type in data_dict:
                 data_dict[box_type].append(num)
             else:
@@ -34,4 +35,4 @@ def sort(data) -> []:
 
 
 def name() -> str:
-    return "box"
+    return "radix"
