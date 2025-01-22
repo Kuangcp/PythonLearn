@@ -52,20 +52,25 @@ def show_result(data, width, height, start, end):
         for w in range(width):
             index = h*width+w
             if index!=end and (data[index][1][0] == 1 or index//width == (height-1)):
-                print('_', end="")
+                print('\u2381', end="")
             else:
                 print(' ', end="")
             if data[index][1][1] == 1:
-                print('|', end="")
+                print('┃', end="")
             elif  w != width-1:
-                print('_', end="")
+                print('\u2381', end="")
         print()
 
 def main():
     try:
-        max_width = int(sys.argv[1])
-        max_height = int(sys.argv[2])
-        print('\n\n宽 × 高：',max_width, '×', max_height)
+        if len(sys.argv) > 1:
+            max_width = int(sys.argv[1])
+            max_height = int(sys.argv[2])
+        else:
+            max_width = 7
+            max_height = 7
+
+        print('\n\n宽 × 高：', max_width, '×', max_height)
         print('默认入口在右上角，出口在左下角')
 
     except IndexError:
