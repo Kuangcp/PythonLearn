@@ -53,9 +53,10 @@ try:
     # 5. Create subplot with two rows
     fig = make_subplots(
         rows=2, cols=1,
-        row_heights=[0.6, 0.4],
+        # 第一个图占92%，第二个图占8%
+        row_heights=[0.92, 0.08],
         subplot_titles=("任务甘特图 (Task Gantt Chart)", "并发任务数 (Concurrent Tasks)"),
-        vertical_spacing=0.12
+        vertical_spacing=0.05
     )
 
     # 6. Add Gantt Chart (Timeline) to first subplot
@@ -64,7 +65,7 @@ try:
     id_to_y = {task_id: idx for idx, task_id in enumerate(unique_ids)}
     
     colors = px.colors.qualitative.Plotly
-    bar_height = 0.35  # 设置条形的高度
+    bar_height = 0.25  # 设置条形的高度，减小以避免Y轴标签重叠
     
     for idx, row in df.iterrows():
         y_center = id_to_y[row['id']]
@@ -80,11 +81,8 @@ try:
                 line=dict(color=colors[idx % len(colors)], width=1),
                 mode='lines',
                 name=str(row['id']),
-                customdata=[[row['id'], row['req_time_display'], row['resp_time_display'], row['duration_ms']]],
-                hovertemplate="<b>ID:</b> %{customdata[0]}<br>" +
-                              "<b>开始:</b> %{customdata[1]}<br>" +
-                              "<b>结束:</b> %{customdata[2]}<br>" +
-                              "<b>耗时:</b> %{customdata[3]:.2f}ms<extra></extra>",
+                text=f"ID: {row['id']}<br> {row['req_time_display'].strftime('%H:%M:%S')}--{row['resp_time_display'].strftime('%H:%M:%S')}<br> 耗时: {row['duration_ms']:.2f}ms",
+                hoverinfo='text',
                 showlegend=False
             ),
             row=1, col=1
@@ -105,7 +103,7 @@ try:
             y=concurrency_df['concurrency'],
             mode='lines',
             name='并发数',
-            line=dict(color='rgb(31, 119, 180)', width=2),
+            line=dict(color='rgb(31, 119, 180)', width=1),
             fill='tozeroy',
             fillcolor='rgba(31, 119, 180, 0.3)',
             hovertemplate='<b>时间</b>: %{x}<br><b>并发数</b>: %{y}<extra></extra>'
@@ -132,7 +130,7 @@ try:
     end_time = df['resp_time_display'].max().strftime('%Y-%m-%d %H:%M:%S')
     
     fig.update_layout(
-        height=800,
+        height=1400,  # 增加整体高度，让甘特图有更多空间
         title_text=f"并发分析 {start_time} - {end_time}",
         showlegend=False,
         hovermode='x unified'
